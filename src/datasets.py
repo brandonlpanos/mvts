@@ -1,7 +1,9 @@
+import os
 import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
+from sklearn.preprocessing import StandardScaler
 
 
 class ImputationDataset(Dataset):
@@ -23,7 +25,6 @@ class ImputationDataset(Dataset):
             df = df.drop("R_VALUE", axis=1)
             df = df.drop("target", axis=1)
             df = df.to_numpy()
-            # Apply standardization
             scaler = StandardScaler()
             scaler.fit(df)
 
@@ -36,14 +37,15 @@ class ImputationDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-        For a given integer index, returns the corresponding (seq_length, feat_dim) array and a noise mask of same shape
+        For a given integer index, returns the corresponding (seq_length, feat_dim) array, noise mask of same shape, and label 1 or 0
         Args:
-            ind: integer index of sample in dataset
+            idx: integer index of sample in dataset
         Returns:
             x: (seq_length, feat_dim) tensor of the multivariate time series corresponding to a sample
             mask: (seq_length, feat_dim) boolean tensor: 0s mask and predict, 1s: unaffected input
+            label: 1 or 0
         """
-        index = self.indices[idx]
+        index = self.indicies[idx]
         df = pd.read_csv(f'../data/long/{index}.csv')
         if len(df) < 40:
             padding = pd.DataFrame(np.nan, index=np.arange(40 - len(df)), columns=df.columns)
@@ -64,7 +66,27 @@ class ImputationDataset(Dataset):
 
         mask = noise_mask(x, self.masking_ratio, self.mean_mask_length)  # (seq_length, feat_dim) boolean array
 
-        return torch.from_numpy(X), torch.from_numpy(mask), label
+        return torch.from_numpy(x), torch.from_numpy(mask), label
+    
+    @staticmethod
+    def unity_based_normalization(data):
+        '''
+        Normalize each row of the data matrix by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        Takes in arrays of shape (features, time)
+        '''
+        # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        # Get the maximum and minimum values of each row
+        max_vals = np.nanmax(data, axis=1)
+        min_vals = np.nanmin(data, axis=1)
+        # Compute the range of each row, and add a small constant to avoid division by zero
+        ranges = max_vals - min_vals
+        eps = np.finfo(data.dtype).eps  # machine epsilon for the data type
+        ranges[ranges < eps] = eps
+        # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        data = (data - min_vals[:, np.newaxis]) / ranges[:, np.newaxis]
+        data = data + np.nanmax(data)
+        data *= (1 / np.nanmax(data, axis=1)[:, np.newaxis])
+        return data
     
 
 def noise_mask(X, masking_ratio, lm=3):
@@ -109,9 +131,7 @@ def geom_noise_mask_single(L, lm, masking_ratio):
     
 
 
-
-
-def find_pad(mvts: torch.Tensor) -> torch.Tensor:
+def find_padding_masks(mvts: torch.Tensor) -> torch.Tensor:
     """
     Takes in a batch of data shaped (batch_size, seq_length, feat_dim) and 
     returns a mask shaped (batch_size, seq_length) where 1 == True == Keep, 0 == False == Mask
