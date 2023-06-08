@@ -5,11 +5,27 @@ import pandas as pd
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
 
+'''
+This file contains the dataset class for the autoregressive denoising task as well as the classification task.
+ImputationDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label
+'''
+
 
 class ImputationDataset(Dataset):
     """Dynamically computes missingness (noise) mask for each sample"""
 
     def __init__(self, indicies, norm_type='unity', mean_mask_length=3, masking_ratio=0.15):
+        """
+        args:
+            indicies: list of indicies of samples to include in dataset
+            norm_type: 'unity' or 'standard'
+            mean_mask_length: mean length of noise mask
+            masking_ratio: ratio of values to mask
+        Returns:
+            x: (batch, seq_length, feat_dim)
+            mask: (batch, seq_length, feat_dim) boolean array: 0s mask and predict, 1s: unaffected input
+            label: (batch, 1) 1 or 0
+        """
         super(ImputationDataset, self).__init__()
 
         self.indicies = indicies
@@ -128,29 +144,14 @@ def geom_noise_mask_single(L, lm, masking_ratio):
             state = 1 - state
     return keep_mask
 
-    
-
-
 def find_padding_masks(mvts: torch.Tensor) -> torch.Tensor:
     """
     Takes in a batch of data shaped (batch_size, seq_length, feat_dim) and 
     returns a mask shaped (batch_size, seq_length) where 1 == True == Keep, 0 == False == Mask
+    Pytorch oposite, so within the model we flip the mask
     """
-    # Create mask
-    # (batch_size, seq_length) We say 1 == True == Keep, 0 == False == Mask, but Pytorch oposite, so within the code we flip the mask
     mask = torch.full(mvts.shape[0:-1], 1, dtype=torch.bool)
-    mask[torch.all(mvts == 0, dim=-1)] = 0
+    mask[torch.isnan(mvts).any(dim=-1)] = 0
     return mask
 
-def padding_mask(lengths, max_len=None):
-    """
-    Used to mask padded positions: creates a (batch_size, max_len) boolean mask from a tensor of sequence lengths,
-    where 1 means keep element at this position (time step)
-    """
-    batch_size = lengths.numel()
-    max_len = max_len or lengths.max_val()  # trick works because of overloading of 'or' operator for non-boolean types
-    return (torch.arange(0, max_len, device=lengths.device)
-            .type_as(lengths)
-            .repeat(batch_size, 1)
-            .lt(lengths.unsqueeze(1)))
 
