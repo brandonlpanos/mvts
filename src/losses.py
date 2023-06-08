@@ -2,9 +2,15 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+'''
+This file contains custom loss functions for the autoregressive denoising task and the classification task.
+'''
+
 
 class MaskedMSELoss(nn.Module):
-    """ Masked MSE Loss
+    """ 
+    Masked MSE Loss for the the autoregressive denoising task.
+    Only calculates loss MSE between the masked regions and the model's prediction.
     """
     def __init__(self, reduction: str = 'mean'):
         super().__init__()
@@ -45,4 +51,3 @@ def l2_reg_loss(model):
     for name, param in model.named_parameters():
         if name == 'output_layer.weight':
             return torch.sum(torch.square(param))
-
