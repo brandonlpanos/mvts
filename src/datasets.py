@@ -1,42 +1,70 @@
 import torch
 import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset
 
 
 class ImputationDataset(Dataset):
     """Dynamically computes missingness (noise) mask for each sample"""
 
-    def __init__(self, data, indices, mean_mask_length=3, masking_ratio=0.15, mode='separate', distribution='geometric', exclude_feats=None):
+    def __init__(self, indicies, norm_type='unity', mean_mask_length=3, masking_ratio=0.15):
         super(ImputationDataset, self).__init__()
-        self.data = data  # this is a subclass of the BaseData class in data.py
-        self.IDs = indices  # list of data IDs, but also mapping between integer index and ID
-        self.feature_df = self.data.feature_df.loc[self.IDs]
+
+        self.indicies = indicies
+        self.norm_type = norm_type
+
+        if self.norm_type == 'standard':
+            dataframes = []
+            for file_name in os.listdir('../data/long/'):
+                df = pd.read_csv('../data/long/' + file_name)
+                dataframes.append(df)
+            df = pd.concat(dataframes, ignore_index=True)
+            df = df.drop(['Unnamed: 0'], axis=1)
+            df = df.drop("R_VALUE", axis=1)
+            df = df.drop("target", axis=1)
+            df = df.to_numpy()
+            # Apply standardization
+            scaler = StandardScaler()
+            scaler.fit(df)
+
+            self.scaler = scaler
         self.masking_ratio = masking_ratio
         self.mean_mask_length = mean_mask_length
-        self.mode = mode
-        self.distribution = distribution
-        self.exclude_feats = exclude_feats
-
-    def update(self):
-        self.mean_mask_length = min(20, self.mean_mask_length + 1)
-        self.masking_ratio = min(1, self.masking_ratio + 0.05)
 
     def __len__(self):
-        return len(self.IDs)
+        return len(self.indicies)
 
-    def __getitem__(self, ind):
+    def __getitem__(self, idx):
         """
         For a given integer index, returns the corresponding (seq_length, feat_dim) array and a noise mask of same shape
         Args:
             ind: integer index of sample in dataset
         Returns:
-            X: (seq_length, feat_dim) tensor of the multivariate time series corresponding to a sample
+            x: (seq_length, feat_dim) tensor of the multivariate time series corresponding to a sample
             mask: (seq_length, feat_dim) boolean tensor: 0s mask and predict, 1s: unaffected input
-            ID: ID of sample
         """
-        X = self.feature_df.loc[self.IDs[ind]].values  # (seq_length, feat_dim) array
-        mask = noise_mask(X, self.masking_ratio, self.mean_mask_length, self.mode, self.distribution, self.exclude_feats)  # (seq_length, feat_dim) boolean array
-        return torch.from_numpy(X), torch.from_numpy(mask), self.IDs[ind]
+        index = self.indices[idx]
+        df = pd.read_csv(f'../data/long/{index}.csv')
+        if len(df) < 40:
+            padding = pd.DataFrame(np.nan, index=np.arange(40 - len(df)), columns=df.columns)
+            df = pd.concat([padding, df])
+
+        label = df['target'].values[-1].astype(np.int64)
+        df = df.drop("target", axis=1)
+        df = df.drop("Unnamed: 0", axis=1)
+        df = df.drop("R_VALUE", axis=1)
+        x = np.array(df.values, dtype=np.float32)
+
+        if self.norm_type == 'standard':
+            x = self.scaler.transform(x)
+        elif self.norm_type == 'unity':
+            x = x.T
+            x = self.unity_based_normalization(x)
+            x = x.T
+
+        mask = noise_mask(x, self.masking_ratio, self.mean_mask_length)  # (seq_length, feat_dim) boolean array
+
+        return torch.from_numpy(X), torch.from_numpy(mask), label
     
 
 def noise_mask(X, masking_ratio, lm=3):
@@ -79,3 +107,30 @@ def geom_noise_mask_single(L, lm, masking_ratio):
     return keep_mask
 
     
+
+
+
+
+def find_pad(mvts: torch.Tensor) -> torch.Tensor:
+    """
+    Takes in a batch of data shaped (batch_size, seq_length, feat_dim) and 
+    returns a mask shaped (batch_size, seq_length) where 1 == True == Keep, 0 == False == Mask
+    """
+    # Create mask
+    # (batch_size, seq_length) We say 1 == True == Keep, 0 == False == Mask, but Pytorch oposite, so within the code we flip the mask
+    mask = torch.full(mvts.shape[0:-1], 1, dtype=torch.bool)
+    mask[torch.all(mvts == 0, dim=-1)] = 0
+    return mask
+
+def padding_mask(lengths, max_len=None):
+    """
+    Used to mask padded positions: creates a (batch_size, max_len) boolean mask from a tensor of sequence lengths,
+    where 1 means keep element at this position (time step)
+    """
+    batch_size = lengths.numel()
+    max_len = max_len or lengths.max_val()  # trick works because of overloading of 'or' operator for non-boolean types
+    return (torch.arange(0, max_len, device=lengths.device)
+            .type_as(lengths)
+            .repeat(batch_size, 1)
+            .lt(lengths.unsqueeze(1)))
+
