@@ -1,8 +1,9 @@
 import math
 import torch
+from typing import *
 from torch import nn, Tensor
 from torch.nn import functional as F
-from torch.nn.modules import MultiheadAttention, Linear, Dropout, BatchNorm1d
+from torch.nn.modules import MultiheadAttention, Linear, Dropout, BatchNorm1d, TransformerEncoderLayer
 
 '''
 This file contains two transformer based models specificaly designed for multivariate time series (mvts) data.
@@ -15,38 +16,45 @@ For mvts one uses learned positional encodings and batch normalization in the tr
 
 
 class TransformerEncoderInputter(nn.Module):
-    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, dropout=0.1, activation='gelu', freeze=False):
+    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, dropout=0.1, freeze=False):
         super(TransformerEncoderInputter, self).__init__()
         self.max_len = max_len
         self.d_model = d_model
         self.n_heads = n_heads
         self.project_inp = nn.Linear(feat_dim, d_model)
         self.pos_enc = LearnablePositionalEncoding(d_model, dropout=dropout*(1.0 - freeze), max_len=max_len)
-        encoder_layer = TransformerBatchNormEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze), activation=activation)
+        encoder_layer = TransformerEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze))
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
         self.output_layer = nn.Linear(d_model, feat_dim)
         self.act = F.gelu
         self.dropout1 = nn.Dropout(dropout)
         self.feat_dim = feat_dim
 
-    def forward(self, X, padding_masks):
+    def forward(self, x, padding_masks):
         """
         Args:
-            X: (batch_size, seq_length, feat_dim) torch tensor of masked features (input)
+            x: (batch_size, seq_length, feat_dim) torch tensor of masked features (input)
             padding_masks: (batch_size, seq_length) boolean tensor, 1 means keep vector at this position, 0 means padding
         Returns:
             output: (batch_size, seq_length, feat_dim)
         """
         # permute because pytorch convention for transformers is [seq_length, batch_size, feat_dim]. padding_masks [batch_size, feat_dim]
-        inp = X.permute(1, 0, 2)
+        inp = x.permute(1, 0, 2)
         # [seq_length, batch_size, d_model] project input vectors to d_model dimensional space
         inp = self.project_inp(inp) * math.sqrt(self.d_model)
+        print(inp.shape)
+        print(inp[0])
+        print()
         inp = self.pos_enc(inp)  # add positional encoding
+        print(inp.shape)
+        print(inp[0])
         # NOTE: logic for padding masks is reversed to comply with definition in MultiHeadAttention, TransformerEncoderLayer
         # (seq_length, batch_size, d_model)
         output = self.transformer_encoder(inp, src_key_padding_mask=~padding_masks)
         # the output transformer encoder/decoder embeddings don't include non-linearity
         output = self.act(output)
+        print(output.shape)
+        print(output[0])
         output = output.permute(1, 0, 2)  # (batch_size, seq_length, d_model)
         output = self.dropout1(output)
         # Most probably defining a Linear(d_model,feat_dim) vectorizes the operation over (seq_length, batch_size).
@@ -60,14 +68,14 @@ class TransformerEncoderClassifier(nn.Module):
     Simplest classifier. Can be either regressor or classifier because the output does not include
     softmax. Concatenates final layer embeddings and uses 0s to ignore padding embeddings in final output layer.
     """
-    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, num_classes, dropout=0.1, activation='gelu', freeze=False):
+    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, num_classes, dropout=0.1, freeze=False):
         super(TransformerEncoderClassifier, self).__init__()
         self.max_len = max_len
         self.d_model = d_model
         self.n_heads = n_heads
         self.project_inp = nn.Linear(feat_dim, d_model)
         self.pos_enc = LearnablePositionalEncoding(d_model, dropout=dropout*(1.0 - freeze), max_len=max_len)
-        encoder_layer = TransformerBatchNormEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze), activation=activation)
+        encoder_layer = TransformerEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze))
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
         self.act = F.gelu
         self.dropout1 = nn.Dropout(dropout)
@@ -81,16 +89,16 @@ class TransformerEncoderClassifier(nn.Module):
         # add F.log_softmax and use NLLoss
         return output_layer
 
-    def forward(self, X, padding_masks):
+    def forward(self, x, padding_masks):
         """
         Args:
-            X: (batch_size, seq_length, feat_dim) torch tensor of masked features (input)
+            x: (batch_size, seq_length, feat_dim) torch tensor of masked features (input)
             padding_masks: (batch_size, seq_length) boolean tensor, 1 means keep vector at this position, 0 means padding
         Returns:
             output: (batch_size, num_classes)
         """
         # permute because pytorch convention for transformers is [seq_length, batch_size, feat_dim]. padding_masks [batch_size, feat_dim]
-        inp = X.permute(1, 0, 2)
+        inp = x.permute(1, 0, 2)
         # [seq_length, batch_size, d_model] project input vectors to d_model dimensional space
         inp = self.project_inp(inp) * math.sqrt(self.d_model)
         inp = self.pos_enc(inp)  # add positional encoding
@@ -111,7 +119,7 @@ class TransformerEncoderClassifier(nn.Module):
     
 
 class LearnablePositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=1024):
+    def __init__(self, d_model, dropout=0.1, max_len=40):
         super(LearnablePositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         # Each position gets its own embedding
