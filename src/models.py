@@ -42,19 +42,13 @@ class TransformerEncoderInputter(nn.Module):
         inp = x.permute(1, 0, 2)
         # [seq_length, batch_size, d_model] project input vectors to d_model dimensional space
         inp = self.project_inp(inp) * math.sqrt(self.d_model)
-        print(inp.shape)
-        print(inp[0])
-        print()
         inp = self.pos_enc(inp)  # add positional encoding
-        print(inp.shape)
-        print(inp[0])
+
         # NOTE: logic for padding masks is reversed to comply with definition in MultiHeadAttention, TransformerEncoderLayer
         # (seq_length, batch_size, d_model)
         output = self.transformer_encoder(inp, src_key_padding_mask=~padding_masks)
         # the output transformer encoder/decoder embeddings don't include non-linearity
         output = self.act(output)
-        print(output.shape)
-        print(output[0])
         output = output.permute(1, 0, 2)  # (batch_size, seq_length, d_model)
         output = self.dropout1(output)
         # Most probably defining a Linear(d_model,feat_dim) vectorizes the operation over (seq_length, batch_size).
