@@ -58,12 +58,49 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch):
                 loss = critereon(y_hat, x, target_masks)
                 running_batch_loss_test.append(loss.item())
 
-            if loss < best_test_loss:
-                best_test_loss = loss
-                torch.save(model.state_dict(), save_path)
+                if loss < best_test_loss:
+                    best_test_loss = loss
+                    torch.save(model.state_dict(), save_path)
 
         print(f"Epoch Train Loss: {np.nanmean(running_batch_loss_train)}\nEpoch Test Loss: {np.nanmean(running_batch_loss_test)}")
                 
     return running_batch_loss_train, running_batch_loss_test
 
-if __name__ == "__"
+if __name__ == "__main__":
+
+    # Create model
+    # dropout = 0.1 dropout
+    # n_heads = 8 number of heads
+    # num_layers = 1 number of layers
+    # feat_dim = 35 number of features
+    # max_len = 40 max length of sequence
+    # d_model = 64 dimension of the model
+    # freeze = False freeze the model True --> no dropout
+    # dim_feedforward = 256 dimension of the feedforward layers within the transformer blocks
+    model = TransformerEncoderInputter(feat_dim=35,
+                                        max_len=40,
+                                        d_model=64, 
+                                        n_heads=8, 
+                                        num_layers=1,
+                                        dim_feedforward=256, 
+                                        dropout=0.1, 
+                                        freeze=False)
+
+    # Create an instance of the model and set to float (default is double)
+    model.float();
+
+    # Read in train and validation indices
+    with open('../data/data_indices.json', 'r') as f: data_indices = json.load(f)
+    train_indices = data_indices['train_indices']
+    val_indices = data_indices['val_indices']
+
+    # Create loaders
+    train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    val_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+
+    # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finaly, train and validate the model
+    n_epoch = 50
+    critereon = MaskedMSELoss()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
+    running_batch_loss_train, running_batch_loss_test = train_and_validate(model, train_dataloader, val_dataloader, n_epoch)
