@@ -2,3 +2,6 @@ data
 experiments
 .DS_Store
 __pycache__
+envmvts
+models
+figs
