@@ -115,8 +115,9 @@ if __name__ == "__main__":
     val_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
-    n_epoch = 100
+    n_epoch = 200
     critereon = MaskedMSELoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     running_batch_loss_train, running_batch_loss_test = train_and_validate_inputer(model, train_dataloader, val_dataloader, n_epoch)
+    np.savez('../models/training_curves_inputting_unity.npz', loss_train=running_batch_loss_train, loss_test=running_batch_loss_test)

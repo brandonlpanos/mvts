@@ -153,5 +153,3 @@ def find_padding_masks(mvts: torch.Tensor) -> torch.Tensor:
     mask = torch.full(mvts.shape[0:-1], 1, dtype=torch.bool)
     mask[torch.isnan(mvts).any(dim=-1)] = 0
     return mask
-
-
