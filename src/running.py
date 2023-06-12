@@ -11,6 +11,22 @@ from datasets import ImputationDataset, find_padding_masks
 
 
 def train_and_validate_inputer(model, train_loader, test_loader, n_epoch):
+    """
+    Trains and validates a model using input data.
+
+    Args:
+        model (torch.nn.Module): The model to be trained and validated.
+        train_loader (torch.utils.data.DataLoader): The data loader for the training set.
+        test_loader (torch.utils.data.DataLoader): The data loader for the test/validation set.
+        n_epoch (int): The number of epochs to train the model.
+
+    Returns:
+        Tuple of two lists: 'running_batch_loss_train' and 'running_batch_loss_test'.
+        'running_batch_loss_train' contains the training loss for each batch in each epoch.
+        'running_batch_loss_test' contains the test loss for each batch in each epoch.
+
+    The traning loop saves the model with the lowest test loss to '../models/inputting_unity_norm.pt'.
+    """
 
     best_test_loss = 1e20
     running_batch_loss_train = []
@@ -99,7 +115,7 @@ if __name__ == "__main__":
     val_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
-    n_epoch = 50
+    n_epoch = 100
     critereon = MaskedMSELoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
