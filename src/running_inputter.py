@@ -119,4 +119,4 @@ if __name__ == "__main__":
     critereon = MaskedMSELoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
-    running_batch_loss_train, running_batch_loss_test = train_and_validate(model, train_dataloader, val_dataloader, n_epoch)
+    running_batch_loss_train, running_batch_loss_test = train_and_validate_inputer(model, train_dataloader, val_dataloader, n_epoch)
