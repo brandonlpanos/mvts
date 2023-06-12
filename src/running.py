@@ -98,7 +98,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
     val_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
-    # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finaly, train and validate the model
+    # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
     n_epoch = 50
     critereon = MaskedMSELoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
