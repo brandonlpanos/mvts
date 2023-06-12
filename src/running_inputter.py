@@ -26,6 +26,13 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch):
         'running_batch_loss_test' contains the test loss for each batch in each epoch.
 
     The traning loop saves the model with the lowest test loss to '../models/inputting_unity_norm.pt'.
+    
+    Autoregressive denoising requres several maskes, filters and dtypses:
+    1) traget = (batch, max_seq_len, feat_dim) tensor with missing values at the beginning replaced by 0
+    2) mask = (batch, max_seq_len, feat_dim) boolean tensor
+    3) padding_mask = (batch, max_seq_len) boolean tensor, 1 means keep, 0 means ignore dtype=torch.bool
+    4) x_masked = (batch, max_seq_len, feat_dim) tensor with missing values that follow a geometric distribution
+    5) target_masks = (batch, max_seq_len, feat_dim) boolean tensor 1 means area to calculate the loss on, opposite to mask
     """
 
     best_test_loss = 1e20
