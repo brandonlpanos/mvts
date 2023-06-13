@@ -3,10 +3,8 @@ import json
 import torch
 import numpy as np
 from losses import MaskedMSELoss
-from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
-from matplotlib.ticker import MultipleLocator 
-from models import TransformerEncoderInputter
+from models import TransformerEncoder
 from datasets import ImputationDataset, find_padding_masks
 
 
@@ -100,7 +98,7 @@ if __name__ == "__main__":
     # d_model = 64 dimension of the model
     # freeze = False freeze the model True --> no dropout
     # dim_feedforward = 256 dimension of the feedforward layers within the transformer blocks
-    model = TransformerEncoderInputter(feat_dim=35,
+    model = TransformerEncoder(feat_dim=35,
                                         max_len=40,
                                         d_model=64, 
                                         n_heads=8, 

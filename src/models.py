@@ -6,18 +6,18 @@ from torch.nn import functional as F
 from torch.nn.modules import MultiheadAttention, Linear, Dropout, BatchNorm1d, TransformerEncoderLayer
 
 '''
-This file contains two transformer based models specificaly designed for multivariate time series (mvts) data.
-TransformerEncoderInputter: The model takes as input a batch of mvts data and outputs a batch of encoded mvts data that is then used for the task of autorregressive denoising.
-Autorregressive denoising is when the model is trained to fill in data that has been masked out. It is important when operating in the data sparse regime, since it allows the 
-model to warm up its weights by learning the dependencies between the different features in the data, leading to better performance on downstream tasks.
-TransformerEncoderClassifier: The model takes as input a batch of mvts data and outputs a batch of logits that are then used for the task of classification.
-For mvts one uses learned positional encodings and batch normalization in the transformer encoder layers.
+This file contains two transformer-based models specifically designed for multivariate time series (mvts) data.
+TransformerEncoder: The model takes as input a batch of mvts data and outputs a batch of encoded mvts data that is then used for the task of autoregressive denoising.
+Autoregressive denoising is when the model is trained to fill in data that has been masked out. It is important when operating in the data-sparse regime since it allows the model to warm up its weights by learning the dependencies between the different features in the data, leading to better performance on downstream tasks.
+CNNModel: simple CNN that processes mvts for the purpose of binary classification and Grad-CAM.
+CombinedModel: combines the transformer with the CNN for classification. The transformer creates embeddings of the mvts of the same dimension and then feeds this into the CNN for classification. Because the embeddings retain their positional information, the saliency maps from Grad-CAM can be derived from these embeddings and projected safely back onto the input mvts.
+For mvts, one uses learned positional encodings and batch normalization in the transformer encoder layers, hence the additional classes: LearnablePositionalEncoding and TransformerBatchNormEncoderLayer.
 '''
 
 
-class TransformerEncoderInputter(nn.Module):
+class TransformerEncoder(nn.Module):
     def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, dropout=0.1, freeze=False):
-        super(TransformerEncoderInputter, self).__init__()
+        super(TransformerEncoder, self).__init__()
         self.max_len = max_len
         self.d_model = d_model
         self.n_heads = n_heads
@@ -92,61 +92,6 @@ class CombinedModel(nn.Module):
         return logits_output
     
 
-class TransformerEncoderClassifier(nn.Module):
-    """
-    Simplest classifier. Can be either regressor or classifier because the output does not include
-    softmax. Concatenates final layer embeddings and uses 0s to ignore padding embeddings in final output layer.
-    """
-    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, num_classes, dropout=0.1, freeze=False):
-        super(TransformerEncoderClassifier, self).__init__()
-        self.max_len = max_len
-        self.d_model = d_model
-        self.n_heads = n_heads
-        self.project_inp = nn.Linear(feat_dim, d_model)
-        self.pos_enc = LearnablePositionalEncoding(d_model, dropout=dropout*(1.0 - freeze), max_len=max_len)
-        encoder_layer = TransformerEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze))
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
-        self.act = F.gelu
-        self.dropout1 = nn.Dropout(dropout)
-        self.feat_dim = feat_dim
-        self.num_classes = num_classes
-        self.output_layer = self.build_output_module(d_model, max_len, num_classes)
-    
-    def build_output_module(self, d_model, max_len, num_classes):
-        output_layer = nn.Linear(d_model * max_len, num_classes)
-        # no softmax (or log softmax), because CrossEntropyLoss does this internally. If probabilities are needed,
-        # add F.log_softmax and use NLLoss
-        return output_layer
-
-    def forward(self, x, padding_masks):
-        """
-        Args:
-            x: (batch_size, seq_length, feat_dim) torch tensor of masked features (input)
-            padding_masks: (batch_size, seq_length) boolean tensor, 1 means keep vector at this position, 0 means padding
-        Returns:
-            output: (batch_size, num_classes)
-        """
-        # permute because pytorch convention for transformers is [seq_length, batch_size, feat_dim]. padding_masks [batch_size, feat_dim]
-        inp = x.permute(1, 0, 2)
-        # [seq_length, batch_size, d_model] project input vectors to d_model dimensional space
-        inp = self.project_inp(inp) * math.sqrt(self.d_model)
-        inp = self.pos_enc(inp)  # add positional encoding
-        # NOTE: logic for padding masks is reversed to comply with definition in MultiHeadAttention, TransformerEncoderLayer
-        # (seq_length, batch_size, d_model)
-        output = self.transformer_encoder(inp, src_key_padding_mask=~padding_masks)
-        # the output transformer encoder/decoder embeddings don't include non-linearity
-        output = self.act(output)
-        output = output.permute(1, 0, 2)  # (batch_size, seq_length, d_model)
-        output = self.dropout1(output)
-        # Output
-        # zero-out padding embeddings
-        output = output * padding_masks.unsqueeze(-1)
-        # (batch_size, seq_length * d_model)
-        output = output.reshape(output.shape[0], -1)
-        output = self.output_layer(output)  # (batch_size, num_classes)
-        return output
-    
-
 class LearnablePositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=40):
         super(LearnablePositionalEncoding, self).__init__()
@@ -158,7 +103,8 @@ class LearnablePositionalEncoding(nn.Module):
         nn.init.uniform_(self.pe, -0.02, 0.02)
 
     def forward(self, x):
-        r"""Inputs of forward function
+        """
+        Inputs of forward function
         Args:
             x: the sequence fed to the positional encoder model (required).
         Shape:
@@ -168,8 +114,10 @@ class LearnablePositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
     
+
 class TransformerBatchNormEncoderLayer(nn.modules.Module):
-    r"""This transformer encoder layer block is made up of self-attn and feedforward network.
+    """
+    This transformer encoder layer block is made up of self-attn and feedforward network.
     It differs from TransformerEncoderLayer in torch/nn/modules/transformer.py in that it replaces LayerNorm
     with BatchNorm.
     Args:
