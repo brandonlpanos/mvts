@@ -91,7 +91,7 @@ if __name__ == '__main__':
     transformer_model.float()
 
     # Load pretrained weights
-    transformer_model.load_state_dict(torch.load('../models/inputting_unity_norm.pt'))
+    transformer_model.load_state_dict(torch.load('../models/inputting_standard_norm.pt'))
 
     # Initiate the CNN model
     cnn_model = CNNModel().float()
@@ -102,15 +102,15 @@ if __name__ == '__main__':
     # Load the dataset
     with open('../data/data_indices.json', 'r') as f: data_indices = json.load(f)
     train_indices = data_indices['train_indices']
-    train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
     val_indices = data_indices['val_indices']
-    test_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='unity', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    test_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Train and validate the model
     n_epoch = 100
     train_loader = train_dataloader
     criterion = nn.CrossEntropyLoss()
-    save_path = '../models/classification_unity_norm.pt'
+    save_path = '../models/classification_standard_norm.pt'
     optimizer = torch.optim.Adam(main_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     main_model.to(device)
