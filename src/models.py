@@ -85,9 +85,7 @@ class CombinedModel(nn.Module):
 
     def forward(self, x, padding_mask):
         transformer_output = self.transformer_model(x, padding_mask)
-        print(transformer_output.shape)
         transformed_output = transformer_output.unsqueeze(1)
-        print(transformed_output.shape)
         logits_output = self.cnn_model(transformed_output)
         return logits_output
     
