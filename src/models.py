@@ -55,7 +55,42 @@ class TransformerEncoderInputter(nn.Module):
         # (batch_size, seq_length, feat_dim)
         output = self.output_layer(output)
         return output
+    
 
+class CNNModel(nn.Module):
+    def __init__(self):
+        super(CNNModel, self).__init__()
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1)
+        self.relu1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.ReLU()
+        self.fc1 = nn.Linear(64 * 35 * 40, 20)
+        self.fc2 = nn.Linear(20, 2)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        logits = self.fc2(x)
+        return logits
+    
+class CombinedModel(nn.Module):
+    def __init__(self, transformer_model, cnn_model):
+        super(CombinedModel, self).__init__()
+        self.transformer_model = transformer_model
+        self.cnn_model = cnn_model
+
+    def forward(self, x, padding_mask):
+        transformer_output = self.transformer_model(x, padding_mask)
+        print(transformer_output.shape)
+        transformed_output = transformer_output.unsqueeze(1)
+        print(transformed_output.shape)
+        logits_output = self.cnn_model(transformed_output)
+        return logits_output
+    
 
 class TransformerEncoderClassifier(nn.Module):
     """
