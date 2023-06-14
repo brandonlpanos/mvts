@@ -7,11 +7,11 @@ from sklearn.preprocessing import StandardScaler
 
 '''
 This file contains the dataset class for the autoregressive denoising task as well as the classification task.
-ImputationDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label
+MVTSDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label
 '''
 
 
-class ImputationDataset(Dataset):
+class MVTSDataset(Dataset):
     """Dynamically computes missingness (noise) mask for each sample"""
 
     def __init__(self, indicies, norm_type='unity', mean_mask_length=3, masking_ratio=0.15):
@@ -26,7 +26,7 @@ class ImputationDataset(Dataset):
             mask: (batch, seq_length, feat_dim) boolean array: 0s mask and predict, 1s: unaffected input
             label: (batch, 1) 1 or 0
         """
-        super(ImputationDataset, self).__init__()
+        super(MVTSDataset, self).__init__()
 
         self.indicies = indicies
         self.norm_type = norm_type

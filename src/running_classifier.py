@@ -1,7 +1,7 @@
 import json
 import torch
 import torch.nn as nn
-from datasets import ImputationDataset
+from datasets import MVTSDataset
 from datasets import find_padding_masks
 from torch.utils.data import DataLoader
 from models import TransformerEncoder, CNNModel, CombinedModel
@@ -102,9 +102,9 @@ if __name__ == '__main__':
     # Load the dataset
     with open('../data/data_indices.json', 'r') as f: data_indices = json.load(f)
     train_indices = data_indices['train_indices']
-    train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
     val_indices = data_indices['val_indices']
-    test_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    test_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Train and validate the model
     n_epoch = 100

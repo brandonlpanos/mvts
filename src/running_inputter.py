@@ -5,7 +5,7 @@ import numpy as np
 from losses import MaskedMSELoss
 from torch.utils.data import DataLoader
 from models import TransformerEncoder
-from datasets import ImputationDataset, find_padding_masks
+from datasets import MVTSDataset, find_padding_masks
 
 
 def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_path):
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     val_indices = data_indices['val_indices']
 
     # Create loaders
-    train_dataloader = DataLoader(ImputationDataset(train_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
-    val_dataloader = DataLoader(ImputationDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
+    val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
     n_epoch = 200
