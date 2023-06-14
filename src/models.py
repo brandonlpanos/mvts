@@ -50,11 +50,14 @@ class TransformerEncoder(nn.Module):
         # the output transformer encoder/decoder embeddings don't include non-linearity
         output = self.act(output)
         output = output.permute(1, 0, 2)  # (batch_size, seq_length, d_model)
+
+        embedding = output.clone()
+
         output = self.dropout1(output)
         # Most probably defining a Linear(d_model,feat_dim) vectorizes the operation over (seq_length, batch_size).
         # (batch_size, seq_length, feat_dim)
         output = self.output_layer(output)
-        return output
+        return output, embedding
     
 
 class CNNModel(nn.Module):
@@ -85,8 +88,8 @@ class CombinedModel(nn.Module):
 
     def forward(self, x, padding_mask):
         transformer_output = self.transformer_model(x, padding_mask)
-        transformed_output = transformer_output.unsqueeze(1)
-        logits_output = self.cnn_model(transformed_output)
+        transformed_output, embedding = transformer_output.unsqueeze(1)
+        logits_output = self.cnn_model(embedding)
         return logits_output
     
 
