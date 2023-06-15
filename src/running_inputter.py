@@ -97,13 +97,13 @@ if __name__ == "__main__":
     # freeze = False freeze the model True --> no dropout
     # dim_feedforward = 256 dimension of the feedforward layers within the transformer blocks
     model = TransformerEncoder(feat_dim=35,
-                                        max_len=40,
-                                        d_model=64, 
-                                        n_heads=8, 
-                                        num_layers=1,
-                                        dim_feedforward=256, 
-                                        dropout=0.1, 
-                                        freeze=False)
+                               max_len=40,
+                               d_model=35, 
+                               n_heads=7, 
+                               num_layers=1,
+                               dim_feedforward=256, 
+                               dropout=0.1, 
+                               freeze=False)
 
     # Create an instance of the model and set to float (default is double)
     model.float();
