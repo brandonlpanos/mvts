@@ -52,7 +52,7 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_p
             target_masks = target_masks.to(device)
             padding_mask = padding_mask.to(device)
 
-            y_hat = model(x_masked, padding_mask)
+            y_hat, embeddings = model(x_masked, padding_mask)
             loss = critereon(y_hat, x, target_masks)
             optimizer.zero_grad()
             loss.backward()
@@ -73,7 +73,7 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_p
                 target_masks = target_masks.to(device)
                 padding_mask = padding_mask.to(device)
       
-                y_hat = model(x_masked, padding_mask)
+                y_hat, embeddings = model(x_masked, padding_mask)
                 loss = critereon(y_hat, x, target_masks)
                 running_batch_loss_test.append(loss.item())
 
