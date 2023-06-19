@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 
 '''
 This file contains the dataset class for the autoregressive denoising task as well as the classification task.
@@ -41,7 +41,7 @@ class MVTSDataset(Dataset):
             df = df.drop("R_VALUE", axis=1)
             df = df.drop("target", axis=1)
             df = df.to_numpy()
-            scaler = StandardScaler()
+            scaler = RobustScaler()
             scaler.fit(df)
 
             self.scaler = scaler
