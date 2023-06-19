@@ -77,4 +77,4 @@ if __name__ == '__main__':
         print(f'Epoch {epoch + 1} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc * 100:.2f}% | Val Loss: {val_loss:.5f} | Val Acc: {val_acc * 100:.2f}%')
 
     # Save the best model to a file
-    torch.save(best_model_state_dict, '../models/cnn_model_standard.pth')
+    torch.save(best_model_state_dict, '../tests/models/cnn_model_standard.pth')
