@@ -41,4 +41,4 @@ def val():
     return val_loss / len(val_dataloader), val_correct / total_samples  # Divide by total_samples
 
 
-if __name__ == 'Main'
+if __name__ == '__main__':
