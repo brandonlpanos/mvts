@@ -1,7 +1,5 @@
 ## Transformer-based sentiment analysis for flare prediction
 
-**Running the code**
-
 Run the autoregressive denoising task to warm up the model weights. 
 
 ```python
