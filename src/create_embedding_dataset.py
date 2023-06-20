@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import torch.nn as nn
 from datasets import MVTSDataset
-from models import TransformerEncoder
 from torch.utils.data import DataLoader
 from datasets import find_padding_masks
+from models import TransformerEncoder, CNNModel, CombinedModel
 
 '''
 In this script, we create a dataset of embeddings from the trained transformer encoder.
@@ -38,38 +38,56 @@ def embedding_to_dataframe(embedding, features, label, indx):
 
     return new_df
 
-# Get column names
-df = pd.read_csv('../data/long/1.csv') # read in random file since all csv files have the same columns
-features = df.columns.tolist()
+if __name__ == '__main__':
 
-# Load all data
-indices = np.arange(0, 485, 1)
-dataloader = DataLoader(MVTSDataset(indices, norm_type='standard'), batch_size=len(indices), shuffle=False, drop_last=False)
-data, _, y = next(iter(dataloader))
+    # Get column names
+    df = pd.read_csv('../data/long/1.csv') # read in random file since all csv files have the same columns
+    features = df.columns.tolist()
 
-# Create the embeddings using the trained transformer model
-transformer_model = TransformerEncoder(feat_dim=35,
-                                       max_len=40,
-                                       d_model=35,
-                                       n_heads=7,
-                                       num_layers=1,
-                                       dim_feedforward=256,
-                                       dropout=0.1,
-                                       freeze=True).float()
-transformer_model.eval();
+    # Load all data
+    indices = np.arange(0, 485, 1)
+    dataloader = DataLoader(MVTSDataset(indices, norm_type='standard'), batch_size=len(indices), shuffle=False, drop_last=False)
+    data, _, y = next(iter(dataloader))
 
-indx = 0
-for input, label in zip(data, y):
-    label = label.item()
-    input = input.unsqueeze(0)
-    padding_mask = find_padding_masks(input)
-    input = torch.nan_to_num(input)
-    output, embedding = transformer_model(input, padding_mask)
-    embedding = embedding.detach().numpy()[0]
-    padding_mask = padding_mask.squeeze(0).detach().numpy()
-    embedding = embedding[padding_mask]
-    df = embedding_to_dataframe(embedding, features, label, indx)
-    df['Unnamed: 0'] = df['Unnamed: 0'].astype(int)
-    df.rename(columns={'Unnamed: 0': ''}, inplace=True)
-    df.to_csv(f'../data/embeddings/{indx}.csv', index=False)
-    indx += 1
+    # Load trained transformer encoder weights
+
+    # Step 1: Create an instance of CombinedModel
+    transformer_model = TransformerEncoder(feat_dim=35,
+                                           max_len=40,
+                                           d_model=35, 
+                                           n_heads=7, 
+                                           num_layers=1,
+                                           dim_feedforward=256, 
+                                           dropout=0.1, 
+                                           freeze=True).float()
+    cnn_model = CNNModel().float()
+    main_model = CombinedModel(transformer_model, cnn_model).float()
+
+    # Step 2: Load the weights for the entire combined model
+    main_model.load_state_dict(torch.load("../models/classification_standard_norm.pt"))
+
+    # Step 3: Remove the weights that belong to the cnn_model from the loaded state dict
+    state_dict = main_model.state_dict()
+    state_dict = {k: v for k, v in state_dict.items() if "cnn_model" not in k}
+
+    # Step 4: Load the modified state dict into the transformer_model
+    transformer_model.load_state_dict(state_dict, strict=False)
+    
+    # Step 5: Set to eval mode
+    transformer_model.eval();
+
+    indx = 0
+    for input, label in zip(data, y):
+        label = label.item()
+        input = input.unsqueeze(0)
+        padding_mask = find_padding_masks(input)
+        input = torch.nan_to_num(input)
+        output, embedding = transformer_model(input, padding_mask)
+        embedding = embedding.detach().numpy()[0]
+        padding_mask = padding_mask.squeeze(0).detach().numpy()
+        embedding = embedding[padding_mask]
+        df = embedding_to_dataframe(embedding, features, label, indx)
+        df['Unnamed: 0'] = df['Unnamed: 0'].astype(int)
+        df.rename(columns={'Unnamed: 0': ''}, inplace=True)
+        df.to_csv(f'../data/embeddings/{indx}.csv', index=False)
+        indx += 1

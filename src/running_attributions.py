@@ -24,7 +24,6 @@ def plot_attributions(mvts, attribution_mask, name=None):
     mvts = mvts.T
     attribution_mask = attribution_mask.T
 
-
     mvts[mvts==0] = np.nan
     mvts = unity_based_normalization(mvts) # normalize the data so easier to see each feature in the original data
 

@@ -153,3 +153,59 @@ def find_padding_masks(mvts: torch.Tensor) -> torch.Tensor:
     mask = torch.full(mvts.shape[0:-1], 1, dtype=torch.bool)
     mask[torch.isnan(mvts).any(dim=-1)] = 0
     return mask
+
+
+class EmbeddingsDataset(Dataset):
+    '''
+    Outputs a tuple of (x, x_norm, y) where x is an embedding tensor of shape (batch, features, time) derived from the trained autoencoder, x_norm is the normalized version of x for ploting and visulization purposes, and y is the instance label.
+    '''
+    def __init__(self, indices):
+        super(EmbeddingsDataset, self).__init__()
+        self.indices = indices
+
+    def __len__(self):
+        return len(self.indices)
+    
+    def __getitem__(self, idx):
+        index = self.indices[idx]
+        df = pd.read_csv(f'../data/embeddings/{index}.csv')
+        if len(df) < 40:
+            padding = pd.DataFrame(np.nan, index=np.arange(40 - len(df)), columns=df.columns)
+            df = pd.concat([padding, df])
+
+        label = df["target"].values[-1].astype(np.int64)
+        df = df.drop("target", axis=1)
+        df = df.drop("Unnamed: 0", axis=1)
+        df = df.drop("R_VALUE", axis=1)
+        embedding = np.array(df.values, dtype=np.float32)
+        embedding_norm = embedding.T
+        embedding_norm = self.unity_based_normalization(embedding_norm)
+        embedding_norm = embedding_norm.T
+        embedding = torch.tensor(embedding, dtype=torch.float32)
+        embedding = torch.nan_to_num(embedding, nan=0)
+        embedding = embedding.unsqueeze(0)
+        embedding_norm = torch.tensor(embedding_norm, dtype=torch.float32)
+        embedding_norm = torch.nan_to_num(embedding_norm, nan=0)
+
+        return embedding, embedding_norm, label
+    
+    @staticmethod
+    def unity_based_normalization(data):
+        '''
+        Normalize each row of the data matrix by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        Takes in arrays of shape (features, time)
+        This is just for visulization purposes, the CNN eats the raw embeddings without a normalization
+        '''
+        # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        # Get the maximum and minimum values of each row
+        max_vals = np.nanmax(data, axis=1)
+        min_vals = np.nanmin(data, axis=1)
+        # Compute the range of each row, and add a small constant to avoid division by zero
+        ranges = max_vals - min_vals
+        eps = np.finfo(data.dtype).eps  # machine epsilon for the data type
+        ranges[ranges < eps] = eps
+        # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
+        data = (data - min_vals[:, np.newaxis]) / ranges[:, np.newaxis]
+        data = data + np.nanmax(data)
+        data *= (1 / np.nanmax(data, axis=1)[:, np.newaxis])
+        return data
