@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 from models import CNNModel
-from datasets import MVTSDataset
 import matplotlib.pyplot as plt
+from datasets import MVTSDataset
 import matplotlib.colors as mcolors
 from captum.attr import GuidedGradCam
 import matplotlib.gridspec as gridspec
@@ -10,6 +10,9 @@ from torch.utils.data import DataLoader
 from matplotlib.ticker import MultipleLocator
 plt.rcParams['font.size'] = 8
 
+'''
+This script is used to run the guided grad cam algorithm on the trained CNN model. The algorithm is from the Captum library.
+'''
 
 def plot_attributions(mvts, attribution_mask, name=None):
 
@@ -84,7 +87,7 @@ def plot_attributions(mvts, attribution_mask, name=None):
                     plt.yticks([])
                     plt.xlim(0,40)
     plt.tight_layout()
-    plt.savefig(f'{fig_save_root}{name}.png', bbox_inches='tight')
+    plt.savefig(f'{path_to_root_fig_save}{name}.png', bbox_inches='tight')
     plt.close(fig)
 
     return None
@@ -111,7 +114,8 @@ def unity_based_normalization(data):
 if __name__ == '__main__':
 
     # Set paths
-    fig_save_root = '../figs/grad_cam/'
+    path_to_root_fig_save = '../figs/grad_cam/'
+    path_to_best_model = '../models/cnn_model_standard.pth'
 
     # Load all data
     indices = np.arange(0, 485, 1)
@@ -120,7 +124,7 @@ if __name__ == '__main__':
 
     # Load the best model
     model = CNNModel()
-    model.load_state_dict(torch.load('../models/cnn_model_standard.pth'))
+    model.load_state_dict(torch.load(path_to_best_model))
     model.eval();
 
     # Create a GuidedGradCam object based on the model and the desired layer

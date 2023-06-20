@@ -6,7 +6,9 @@ from models import CNNModel
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
 
-# Define train and test loops 
+'''
+This script is used to train the CNN model.
+'''
 
 def train():
     model.train()
