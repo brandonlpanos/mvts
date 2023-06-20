@@ -1,13 +1,13 @@
 import torch
 import numpy as np
-from models import CNNModel
-from datasets import EmbeddingsDataset
-from captum.attr import GuidedGradCam
-from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from captum.attr import GuidedGradCam
 import matplotlib.gridspec as gridspec
+from datasets import EmbeddingsDataset
+from torch.utils.data import DataLoader
 from matplotlib.ticker import MultipleLocator
+from models import TransformerEncoder, CNNModel, CombinedModel
 plt.rcParams['font.size'] = 8
 
 '''
@@ -86,7 +86,7 @@ def plot_attributions(mvts, attribution_mask, name=None):
                     plt.yticks([])
                     plt.xlim(0,40)
     plt.tight_layout()
-    plt.savefig(f'../figs/grad_cam/{name}.png', bbox_inches='tight')
+    plt.savefig(f'../figs/grad_cam_embedd/{name}.png', bbox_inches='tight')
     plt.close(fig)
 
     return None
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     # Load all data
     indices = np.arange(0, 485, 1)
-    dataloader = DataLoader(EmbeddingsDataset(indices, norm_type='standard'), batch_size=len(indices), shuffle=False, drop_last=False)
+    dataloader = DataLoader(EmbeddingsDataset(indices), batch_size=len(indices), shuffle=False, drop_last=False)
     data, _, labels = next(iter(dataloader))
 
     # Step 1: Create an instance of the CombinedModel
@@ -144,13 +144,12 @@ if __name__ == '__main__':
     cnn_model.eval();
 
     # Create a GuidedGradCam object based on the model and the desired layer
-    guided_grad_cam = GuidedGradCam(model, model.conv3)
+    guided_grad_cam = GuidedGradCam(cnn_model, cnn_model.conv3)
 
     for indx, (x, y) in enumerate(zip(data, labels)):
         if y.item() == 0: continue
         name = indices[indx]
         x = x.unsqueeze_(0)
-        x = x.unsqueeze_(1)
         x = x.requires_grad_()
         x = torch.nan_to_num(x)
         attribution_mask = guided_grad_cam.attribute(x, target=y)
@@ -158,12 +157,4 @@ if __name__ == '__main__':
         attribution_mask = attribution_mask.squeeze().detach().numpy()  
         plot_attributions(x, attribution_mask, name=name)
         # save attribution mask
-        np.save(f'../data/attributions/{name}.npy', attribution_mask)
-
-
-
-# Load data
-Mydataset = CNNDataset(indices=[62])
-train_dataloader = DataLoader(Mydataset, batch_size=1, shuffle=False)
-embedding, embedding_norm, label = next(iter(train_dataloader))
-
+        np.save(f'../data/attributions_from_embedd/{name}.npy', attribution_mask)
