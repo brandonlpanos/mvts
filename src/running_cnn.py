@@ -2,9 +2,9 @@ import json
 import torch
 import numpy as np
 import torch.nn as nn
+from models import CNNModel
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
-from models import CNNModel
 
 # Define train and test loops 
 
