@@ -140,5 +140,5 @@ if __name__ == '__main__':
         x = torch.nan_to_num(x)
         attribution_mask = guided_grad_cam.attribute(x, target=y)
         x = x.squeeze().detach().numpy()
-        attribution_mask = attribution_mask.squeeze().detach().numpy()  
+        attribution_mask = attribution_mask.squeeze().detach().numpy()
         plot_attributions(x, attribution_mask, name=name)
