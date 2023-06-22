@@ -87,7 +87,7 @@ def plot_attributions(mvts, attribution_mask, name=None):
                     plt.yticks([])
                     plt.xlim(0,40)
     plt.tight_layout()
-    plt.savefig(f'{path_to_root_fig_save}{name}.png', bbox_inches='tight')
+    plt.savefig(f'../kfold/figs/{name}.png', bbox_inches='tight')
     plt.close(fig)
 
     return None
@@ -120,27 +120,29 @@ if __name__ == '__main__':
 
     # Itterate over all mvts
     for indx, (x, y) in enumerate(zip(data, labels)):
-    
+        if y.item() == 0: continue
+        name = indices[indx]
+        x = x.unsqueeze_(0)
+        x = x.unsqueeze_(1)
+        x = x.requires_grad_()
+        x = torch.nan_to_num(x)
+        attribution_masks = []
         # Itterate over all models from each 50 folds 
         for model_indx in range(50):
-
+            if model_indx in [27,37]: continue
             # Load best model for a specific fold
             model = CNNModel()
             model.load_state_dict(torch.load(f'../kfold/models/cnn_model_standard_{model_indx}.pth'))
             model.eval();
-
             # Create a GuidedGradCam object based on the model and the desired layer
             guided_grad_cam = GuidedGradCam(model, model.conv3)
-
-            # Compute the saliency maps for each input
-            for indx, (x, y) in enumerate(zip(data, labels)):
-                if y.item() == 0: continue
-                name = indices[indx]
-                x = x.unsqueeze_(0)
-                x = x.unsqueeze_(1)
-                x = x.requires_grad_()
-                x = torch.nan_to_num(x)
-                attribution_mask = guided_grad_cam.attribute(x, target=y)
-                x = x.squeeze().detach().numpy()
-                attribution_mask = attribution_mask.squeeze().detach().numpy()
-                plot_attributions(x, attribution_mask, name=name)
+            # Compute the attribution mask for the desired class
+            attribution_mask = guided_grad_cam.attribute(x, target=y)
+            attribution_mask = attribution_mask.squeeze().detach().numpy()
+            attribution_masks.append(attribution_mask)
+            # delete model
+            del model
+        x = x.squeeze().detach().numpy()
+        attribution_masks = np.array(attribution_masks)
+        attribution_mask = np.nanmean(attribution_masks, axis=0)
+        plot_attributions(x, attribution_mask, name=name)
