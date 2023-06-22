@@ -139,6 +139,8 @@ if __name__ == '__main__':
             # Compute the attribution mask for the desired class
             attribution_mask = guided_grad_cam.attribute(x, target=y)
             attribution_mask = attribution_mask.squeeze().detach().numpy()
+            # attribution_mask = attribution_mask / np.nanmax(attribution_mask)
+            attribution_mask = unity_based_normalization(attribution_mask)
             attribution_masks.append(attribution_mask)
             # delete model
             del model
@@ -146,3 +148,4 @@ if __name__ == '__main__':
         attribution_masks = np.array(attribution_masks)
         attribution_mask = np.nanmean(attribution_masks, axis=0)
         plot_attributions(x, attribution_mask, name=name)
+        np.save(f'../kfold/attributions/{name}.npy', attribution_mask)
