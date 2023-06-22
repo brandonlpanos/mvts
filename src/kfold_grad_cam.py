@@ -113,35 +113,34 @@ def unity_based_normalization(data):
 
 if __name__ == '__main__':
 
-    for file in os.listdir('../data/processed/'):
-        path_to_best_model = '../models/cnn_model_standard.pth'
-
-    # Set paths
-    path_to_root_fig_save = '../figs/grad_cam/'
-    path_to_best_model = '../models/cnn_model_standard.pth'
-
     # Load all data
     indices = np.arange(0, 485, 1)
     dataloader = DataLoader(MVTSDataset(indices, norm_type='standard'), batch_size=len(indices), shuffle=False, drop_last=False)
     data, _, labels = next(iter(dataloader))
 
-    # Load the best model
-    model = CNNModel()
-    model.load_state_dict(torch.load(path_to_best_model))
-    model.eval();
-
-    # Create a GuidedGradCam object based on the model and the desired layer
-    guided_grad_cam = GuidedGradCam(model, model.conv3)
-
-    # Compute the saliency maps for each input
+    # Itterate over all mvts
     for indx, (x, y) in enumerate(zip(data, labels)):
-        if y.item() == 0: continue
-        name = indices[indx]
-        x = x.unsqueeze_(0)
-        x = x.unsqueeze_(1)
-        x = x.requires_grad_()
-        x = torch.nan_to_num(x)
-        attribution_mask = guided_grad_cam.attribute(x, target=y)
-        x = x.squeeze().detach().numpy()
-        attribution_mask = attribution_mask.squeeze().detach().numpy()
-        plot_attributions(x, attribution_mask, name=name)
+    
+        # Itterate over all models from each 50 folds 
+        for model_indx in range(50):
+
+            # Load best model for a specific fold
+            model = CNNModel()
+            model.load_state_dict(torch.load(f'../kfold/models/cnn_model_standard_{model_indx}.pth'))
+            model.eval();
+
+            # Create a GuidedGradCam object based on the model and the desired layer
+            guided_grad_cam = GuidedGradCam(model, model.conv3)
+
+            # Compute the saliency maps for each input
+            for indx, (x, y) in enumerate(zip(data, labels)):
+                if y.item() == 0: continue
+                name = indices[indx]
+                x = x.unsqueeze_(0)
+                x = x.unsqueeze_(1)
+                x = x.requires_grad_()
+                x = torch.nan_to_num(x)
+                attribution_mask = guided_grad_cam.attribute(x, target=y)
+                x = x.squeeze().detach().numpy()
+                attribution_mask = attribution_mask.squeeze().detach().numpy()
+                plot_attributions(x, attribution_mask, name=name)
