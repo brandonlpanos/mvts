@@ -84,4 +84,5 @@ if __name__ == '__main__':
 
         if best_val_acc > 0.85:
             # Save the best model to a file
-            torch.save(best_model_state_dict, f'../models/kfold/cnn_model_standard_{n_fold}.pth')
+            torch.save(best_model_state_dict, f'../kfold/models/cnn_model_standard_{n_fold}.pth')
+            np.savez(f'../kfold/splits/fold_{n_fold}.npz', val_indices=val_indices, train_indices=train_indices)
