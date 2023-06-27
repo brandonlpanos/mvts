@@ -65,8 +65,8 @@ if __name__ == "__main__":
         train_indices = fhand['train_indices']
 
         # Create dataloaders
-        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=16, shuffle=True, drop_last=True)
-        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='standard'), batch_size=16, shuffle=True, drop_last=True)
+        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
+        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
 
         # Initiate combined model
         transformer_model = TransformerEncoder(feat_dim=35,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
                 print(f'Epoch {epoch + 1} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc * 100:.2f}% | Val Loss: {val_loss:.5f} | Val Acc: {val_acc * 100:.2f}%')
 
         # Save the best model to a file
-        torch.save(best_model_state_dict, f'../kfold/models_combined_standard/{file_name}.pth')
+        torch.save(best_model_state_dict, f'../kfold/models_combined_unity/{file_name}.pth')
 
         # Clean up memory
         del transformer_model, cnn_model, combined_model, optimizer, criterion, train_dataloader, val_dataloader, best_model_state_dict
