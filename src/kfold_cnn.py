@@ -3,13 +3,16 @@ import config
 import numpy as np
 import torch.nn as nn
 from models import CNNModel
+from normalizations import *
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
 '''
-This script is used to train a CNN model using k-fold cross-validation.
+This script is used to train a CNN model over 50 random train/val splits of the dataset.
 '''
+
+# Train and validation loops for the CNN model
 
 def train():
     model.train()
@@ -17,6 +20,7 @@ def train():
     train_correct = 0
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(train_dataloader):
+        x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device).unsqueeze(1)  # Add a channel dimension
         y = y.to(device).long()  # Convert the target tensor to long
         optimizer.zero_grad()
@@ -35,6 +39,7 @@ def val():
     val_correct = 0
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(val_dataloader):
+        x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device).unsqueeze(1)  # Add a channel dimension
         y = y.to(device).long()  # Convert the target tensor to long
         probabilities = model(x)
@@ -43,7 +48,6 @@ def val():
         val_correct += (probabilities.argmax(dim=-1) == y).sum().item()
         total_samples += x.size(0)  # Increment the total samples by batch size
     return val_loss / len(val_dataloader), val_correct / total_samples  # Divide by total_samples
-
 
 
 if __name__ == '__main__':
@@ -63,8 +67,8 @@ if __name__ == '__main__':
         train_indices = fhand['train_indices']
 
         # Create dataloaders
-        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
-        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
+        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type=config.BASE_NORM), batch_size=16, shuffle=True, drop_last=True)
+        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type=config.BASE_NORM), batch_size=16, shuffle=True, drop_last=True)
 
         # Define model, optimizer, and loss function
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -92,6 +96,7 @@ if __name__ == '__main__':
 
 
         # Save the best model to a file
+        models
         torch.save(best_model_state_dict, f'../kfold/models_cnn_unity/{file_name}.pth')
 
         # Clean up memory

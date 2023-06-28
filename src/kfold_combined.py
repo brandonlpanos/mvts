@@ -3,28 +3,17 @@ import config
 import numpy as np
 import torch.nn as nn
 from models import CNNModel
+from normalizations import *
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
 from datasets import find_padding_masks
 from models import TransformerEncoder, CNNModel, CombinedModel
 
-# Function for first order topological shuffle (shuffle across time acess for each feature)
-def shuffle_tensor_along_time(tensor):
-    batch_size, time_steps, d_features = tensor.size()
-    indices = torch.stack([torch.randperm(time_steps) for _ in range(batch_size * d_features)]).view(batch_size, d_features, time_steps)
-    shuffled_tensor = tensor.permute(0, 2, 1).gather(2, indices).permute(0, 2, 1)
-    return shuffled_tensor
+"""
+This script is used to train the combined model over 50 random train/val splits of the dataset.
+"""
 
-# Function for second order topological shuffle (shuffle across time and feature access)
-def topological_shuffle(tensor):
-    batch_size, time_steps, d_features = tensor.size()
-    shuffled_tensor = tensor.clone()
-    for i in range(batch_size):
-        indices = torch.randperm(time_steps * d_features)
-        shuffled_tensor[i] = tensor[i].view(-1)[indices].view(time_steps, d_features)
-    return shuffled_tensor
-
-
+# Train and validation loops for the combined model
 
 def train():
     combined_model.train()
@@ -33,10 +22,7 @@ def train():
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(train_dataloader):
         padding_mask = find_padding_masks(x)
-
-        #? for shuffle metrics
-        x = shuffle_tensor_along_time(x)
-
+        x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
         optimizer.zero_grad()
@@ -56,10 +42,7 @@ def val():
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(val_dataloader):
         padding_mask = find_padding_masks(x)
-
-        #? for shuffle metrics
-        x = shuffle_tensor_along_time(x)
-
+        x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
         probabilities = combined_model(x, padding_mask).to(device)
@@ -68,7 +51,6 @@ def val():
         val_correct += (probabilities.argmax(dim=-1) == y).sum().item()
         total_samples += x.size(0)  # Increment the total samples by batch size
     return val_loss / len(val_dataloader), val_correct / total_samples  # Divide by total_samples
-
 
 
 if __name__ == "__main__":
@@ -89,8 +71,8 @@ if __name__ == "__main__":
         train_indices = fhand['train_indices']
 
         # Create dataloaders
-        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
-        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
+        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type=config.BASE_NORM), batch_size=16, shuffle=True, drop_last=True)
+        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type=config.BASE_NORM), batch_size=16, shuffle=True, drop_last=True)
 
         # Initiate combined model
         transformer_model = TransformerEncoder(feat_dim=35,
