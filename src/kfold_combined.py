@@ -8,6 +8,12 @@ from datasets import find_padding_masks
 from models import TransformerEncoder, CNNModel, CombinedModel
 
 
+def shuffle_tensor_along_time(tensor):
+    batch_size, time_steps, d_features = tensor.size()
+    indices = torch.stack([torch.randperm(time_steps) for _ in range(batch_size * d_features)]).view(batch_size, d_features, time_steps)
+    shuffled_tensor = tensor.permute(0, 2, 1).gather(2, indices).permute(0, 2, 1)
+    return shuffled_tensor
+
 def train():
     combined_model.train()
     train_loss = 0
@@ -15,6 +21,10 @@ def train():
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(train_dataloader):
         padding_mask = find_padding_masks(x)
+
+        #? for shuffle metrics
+        x = shuffle_tensor_along_time(x)
+
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
         optimizer.zero_grad()
@@ -34,6 +44,10 @@ def val():
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(val_dataloader):
         padding_mask = find_padding_masks(x)
+
+        #? for shuffle metrics
+        x = shuffle_tensor_along_time(x)
+
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
         probabilities = combined_model(x, padding_mask).to(device)
@@ -108,7 +122,7 @@ if __name__ == "__main__":
                 print(f'Epoch {epoch + 1} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc * 100:.2f}% | Val Loss: {val_loss:.5f} | Val Acc: {val_acc * 100:.2f}%')
 
         # Save the best model to a file
-        torch.save(best_model_state_dict, f'../kfold/models_combined_unity/{file_name}.pth')
+        torch.save(best_model_state_dict, f'../kfold/models_combined_unity_shuffel/{file_name}.pth')
 
         # Clean up memory
         del transformer_model, cnn_model, combined_model, optimizer, criterion, train_dataloader, val_dataloader, best_model_state_dict
