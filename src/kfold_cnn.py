@@ -47,16 +47,23 @@ def val():
 
 if __name__ == '__main__':
 
-    indices = np.arange(0, 485, 1)
+    # Collect filenames for all 50 models
+    path_to_splits = '../kfold/splits/'
+    file_names = np.arange(0, 50, 1)
+    file_names = np.delete(file_names, np.argwhere(file_names == 27))
+    file_names = np.delete(file_names, np.argwhere(file_names == 37))
 
-    for n_fold in range(50):
-        
-        # Random split of indices into train and validation sets
-        train_indices, val_indices = train_test_split(indices, test_size=0.25, shuffle=True)
-        
-        # Create train and validation datasets
-        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='standard'), batch_size=16, shuffle=True, drop_last=True)
-        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=16, shuffle=True, drop_last=True)
+    for file_name in file_names:
+
+        # Load split indices
+        path = path_to_splits + 'fold_' + str(file_name) + '.npz'
+        fhand = np.load(path)
+        val_indices = fhand['val_indices']
+        train_indices = fhand['train_indices']
+
+        # Create dataloaders
+        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
+        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='unity'), batch_size=16, shuffle=True, drop_last=True)
 
         # Define model, optimizer, and loss function
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -82,7 +89,9 @@ if __name__ == '__main__':
             
                 print(f'Epoch {epoch + 1} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc * 100:.2f}% | Val Loss: {val_loss:.5f} | Val Acc: {val_acc * 100:.2f}%')
 
-        if best_val_acc > 0.85:
-            # Save the best model to a file
-            torch.save(best_model_state_dict, f'../kfold/models/cnn_model_standard_{n_fold}.pth')
-            np.savez(f'../kfold/splits/fold_{n_fold}.npz', val_indices=val_indices, train_indices=train_indices)
+
+        # Save the best model to a file
+        torch.save(best_model_state_dict, f'../kfold/models_cnn_unity/{file_name}.pth')
+
+        # Clean up memory
+        del model, optimizer, criterion, train_dataloader, val_dataloader, best_model_state_dict
