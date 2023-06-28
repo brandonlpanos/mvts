@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import config
 import numpy as np
 from losses import MaskedMSELoss
 from torch.utils.data import DataLoader
@@ -118,7 +119,6 @@ if __name__ == "__main__":
     val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard', mean_mask_length=3, masking_ratio=0.15), batch_size=10, shuffle=True, drop_last=True)
 
     # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
-    n_epoch = 200
     critereon = MaskedMSELoss()
     save_path = '../models/inputting_standard_norm.pt'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     running_batch_loss_train, running_batch_loss_test = train_and_validate_inputer(model,
                                                                                    train_dataloader,
                                                                                    val_dataloader,
-                                                                                   n_epoch, 
+                                                                                   config.N_EPOCHS_AR, 
                                                                                    save_path
     )
     np.savez(f'../models/training_curves_inputting_standard.npz', loss_train=running_batch_loss_train, loss_test=running_batch_loss_test)

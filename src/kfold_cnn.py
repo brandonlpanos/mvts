@@ -1,4 +1,5 @@
 import torch
+import config
 import numpy as np
 import torch.nn as nn
 from models import CNNModel
@@ -77,7 +78,7 @@ if __name__ == '__main__':
         best_val_loss = float('inf')
         best_model_state_dict = None
 
-        for epoch in range(50):
+        for epoch in range(config.N_EPOCHS):
             train_loss, train_acc = train()
             val_loss, val_acc = val()
             

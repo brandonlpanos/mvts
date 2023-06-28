@@ -1,4 +1,5 @@
 import torch
+import config
 import numpy as np
 import torch.nn as nn
 from models import CNNModel
@@ -12,6 +13,15 @@ def shuffle_tensor_along_time(tensor):
     batch_size, time_steps, d_features = tensor.size()
     indices = torch.stack([torch.randperm(time_steps) for _ in range(batch_size * d_features)]).view(batch_size, d_features, time_steps)
     shuffled_tensor = tensor.permute(0, 2, 1).gather(2, indices).permute(0, 2, 1)
+    return shuffled_tensor
+
+# Function for second order topological shuffle (shuffle across time and feature access)
+def topological_shuffle(tensor):
+    batch_size, time_steps, d_features = tensor.size()
+    shuffled_tensor = tensor.clone()
+    for i in range(batch_size):
+        indices = torch.randperm(time_steps * d_features)
+        shuffled_tensor[i] = tensor[i].view(-1)[indices].view(time_steps, d_features)
     return shuffled_tensor
 
 
@@ -63,8 +73,6 @@ def val():
 
 if __name__ == "__main__":
     
-    n_epochs = 50
-
     # Collect filenames for all 50 models
     path_to_splits = '../kfold/splits/'
     file_names = np.arange(0, 50, 1)
@@ -110,7 +118,7 @@ if __name__ == "__main__":
         best_model_state_dict = None
 
         # Training loop for each split
-        for epoch in range(n_epochs):
+        for epoch in range(config.N_EPOCHS):
 
             train_loss, train_acc = train()
             val_loss, val_acc = val()
