@@ -7,12 +7,14 @@ from torch.utils.data import DataLoader
 from datasets import find_padding_masks
 from models import TransformerEncoder, CNNModel, CombinedModel
 
-
+# Function for first order topological shuffle (shuffle across time acess for each feature)
 def shuffle_tensor_along_time(tensor):
     batch_size, time_steps, d_features = tensor.size()
     indices = torch.stack([torch.randperm(time_steps) for _ in range(batch_size * d_features)]).view(batch_size, d_features, time_steps)
     shuffled_tensor = tensor.permute(0, 2, 1).gather(2, indices).permute(0, 2, 1)
     return shuffled_tensor
+
+
 
 def train():
     combined_model.train()
