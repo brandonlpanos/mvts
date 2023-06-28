@@ -1,3 +1,4 @@
+import os
 import torch
 import config
 import numpy as np
@@ -114,7 +115,10 @@ if __name__ == "__main__":
                 print(f'Epoch {epoch + 1} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc * 100:.2f}% | Val Loss: {val_loss:.5f} | Val Acc: {val_acc * 100:.2f}%')
 
         # Save the best model to a file
-        torch.save(best_model_state_dict, f'../kfold/models_combined_unity_shuffel/{file_name}.pth')
+        base_save_dir = '../models/' + config.RUN_NAME + '/'
+        if os.path.exists(base_save_dir) == False:
+            os.mkdir(base_save_dir)
+        torch.save(best_model_state_dict, f'{base_save_dir}{file_name}.pth')
 
         # Clean up memory
         del transformer_model, cnn_model, combined_model, optimizer, criterion, train_dataloader, val_dataloader, best_model_state_dict
