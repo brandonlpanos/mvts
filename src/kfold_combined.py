@@ -22,7 +22,7 @@ def train():
     train_correct = 0
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(train_dataloader):
-        padding_mask = find_padding_masks(x)
+        padding_mask = find_padding_masks(x).to(device)
         x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
@@ -42,7 +42,7 @@ def val():
     val_correct = 0
     total_samples = 0  # Variable to keep track of total samples
     for i, (x, mask, y) in enumerate(val_dataloader):
-        padding_mask = find_padding_masks(x)
+        padding_mask = find_padding_masks(x).to(device)
         x = config.ACTIVE_NORM(x) #? Secondary layer of normalization
         x = torch.nan_to_num(x).to(device)
         y = y.to(device).long()  # Convert the target tensor to long
@@ -61,6 +61,8 @@ if __name__ == "__main__":
     file_names = np.arange(0, 50, 1)
     file_names = np.delete(file_names, np.argwhere(file_names == 27))
     file_names = np.delete(file_names, np.argwhere(file_names == 37))
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Loop over random splits
     for file_name in file_names:
@@ -87,10 +89,9 @@ if __name__ == "__main__":
 
         transformer_model.float()
         cnn_model = CNNModel().float()
-        combined_model = CombinedModel(transformer_model, cnn_model).float()
+        combined_model = CombinedModel(transformer_model, cnn_model).float().to(device)
 
-        # Define model, optimizer, and loss function
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # Define optimizer, and loss function
         optimizer = torch.optim.Adam(combined_model.parameters(), lr=0.001)
         criterion = nn.CrossEntropyLoss()
 
