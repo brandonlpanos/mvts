@@ -6,7 +6,7 @@ The dataset is bootstrapped from the [SWAN-SF](https://doi.org/10.7910/DVN/EBCFK
 
 The idea is to gradually loosen the structure in the data and monitor how this affects the prediction capacity.  
 
-![example](data_reduction3.png)
+![example](data_reduction4.png)
 
 ![example](model_overview.png)
 
