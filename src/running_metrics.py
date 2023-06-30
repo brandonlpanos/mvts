@@ -61,22 +61,11 @@ def tss(y_true, y_hat):
 if __name__ == '__main__':
 
     # Initialize lists to store metrics
-
-    running_acc_val = []
-    running_acc_train = []
-
     running_tss_val = []
-    running_tss_train = []
-
-    running_bss_val = []
-    running_bss_train = []
-
     running_auc_val = []
-    running_auc_train = []
-
-    running_brier_skill_scores_val = []
-    running_brier_skill_scores_train = []
-
+    running_hss_val = []
+    running_bss_val = []
+    running_acc_val = []
 
     # Collect filenames for all 50 models
     path_to_splits = '../kfold/splits/'
@@ -84,6 +73,7 @@ if __name__ == '__main__':
     file_names = np.delete(file_names, np.argwhere(file_names == 27))
     file_names = np.delete(file_names, np.argwhere(file_names == 37))
 
+    # Loop over all 50 different splits
     for file_name in file_names:
 
         print(file_name)
@@ -92,19 +82,14 @@ if __name__ == '__main__':
         path = path_to_splits + 'fold_' + str(file_name) + '.npz'
         fhand = np.load(path)
         val_indices = fhand['val_indices']
-        train_indices = fhand['train_indices']
 
         # Create dataloaders
         val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=len(val_indices), shuffle=False, drop_last=False)
-        train_dataloader = DataLoader(MVTSDataset(train_indices, norm_type='standard'), batch_size=len(train_indices), shuffle=False, drop_last=False)
 
-        # Load data
+        # Load validation data
         data_val, _, labels_val = next(iter(val_dataloader))
         data_val = torch.nan_to_num(data_val)
         data_val = data_val.unsqueeze_(1)
-        data_train, _, labels_train = next(iter(train_dataloader))
-        data_train = data_train.unsqueeze_(1)
-        data_train = torch.nan_to_num(data_train)
 
         # Load model
         model = CNNModel()
@@ -112,60 +97,35 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(path))
         model.eval()
 
-        # Calculate y_hat and y_true for both train and validation sets
+        # Calculate y_hat and y_true for the validation set
         logits_val = model(data_val)
         probabilities_val = F.softmax(logits_val, dim=1) 
         y_hat_val = probabilities_val[:, 1].detach().numpy() 
-        y_true_val = labels_val.detach().numpy() # Extract the true labels
-
-        logits_train = model(data_train)
-        probabilities_train = F.softmax(logits_train, dim=1)
-        y_hat_train = probabilities_train[:, 1].detach().numpy()
-        y_true_train = labels_train.detach().numpy()
+        y_true_val = labels_val.detach().numpy()
 
         # Apply metrics
-        accuracy_val = accuracy(y_true_val, y_hat_val)
-        accuracy_train = accuracy(y_true_train, y_hat_train)
-
-        hss_val = hss(y_true_val, y_hat_val)
-        hss_train = hss(y_true_train, y_hat_train)
-
         tss_val = tss(y_true_val, y_hat_val)
-        tss_train = tss(y_true_train, y_hat_train)
-
         auc_val = roc_auc_score(y_true_val, y_hat_val)
-        auc_train = roc_auc_score(y_true_train, y_hat_train)
-
-        brier_skill_score_val = calculate_brier_skill_score(y_true_val, y_hat_val)
-        brier_skill_score_train = calculate_brier_skill_score(y_true_train, y_hat_train)
+        hss_val = hss(y_true_val, y_hat_val)
+        bss_val = calculate_brier_skill_score(y_true_val, y_hat_val)
+        accuracy_val = accuracy(y_true_val, y_hat_val)
 
         # Append metrics to lists
-        running_acc_val.append(accuracy_val)
-        running_acc_train.append(accuracy_train)
-
         running_tss_val.append(tss_val)
-        running_tss_train.append(tss_train)
-
-        running_bss_val.append(brier_skill_score_val)
-        running_bss_train.append(brier_skill_score_train)
-
         running_auc_val.append(auc_val)
-        running_auc_train.append(auc_train)
-
-        running_brier_skill_scores_val.append(brier_skill_score_val)
-        running_brier_skill_scores_train.append(brier_skill_score_train)
+        running_hss_val.append(hss_val)
+        running_bss_val.append(bss_val)
+        running_acc_val.append(accuracy_val)
+    
+    cnn_df  = 
 
 
     # Store metics in a dictionary and save to disk
-    metrics = {'running_acc_val': running_acc_val,
-               'running_acc_train': running_acc_train,
-               'running_auc_val': running_auc_val,
-               'running_auc_train': running_auc_train,
-               'running_tss_val': running_tss_val,
-               'running_tss_train': running_tss_train,
-               'running_bss_val': running_bss_val,
-               'running_bss_train': running_bss_train,
-               'running_brier_skill_scores_val': running_brier_skill_scores_val,
-               'running_brier_skill_scores_train': running_brier_skill_scores_train
-        }
+    metrics = {
+        'running_tss_val': running_tss_val,
+        'running_auc_val': running_auc_val,
+        'running_hss_val': running_hss_val,
+        'running_bss_val': running_bss_val,
+        'running_acc_val': running_acc_val
+    }
     with open('../data/metrics_standard_cnn.pkl', 'wb') as f: pickle.dump(metrics, f)
