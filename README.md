@@ -8,6 +8,6 @@ The idea is to gradually loosen the structure in the data and monitor how this a
 
 ![example](data_reduction4.png)
 
-![example](model_overview.png)
+<!-- ![example](model_overview.png) -->
 
 ![example](data_aug_overview.png)
