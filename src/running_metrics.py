@@ -71,10 +71,11 @@ if __name__ == '__main__':
     path_to_models_trained_on_diff_augs = '../models/'
     file_names = np.array( [i for i in range(50) if i not in [27, 37]] )
 
-    # Itterate over each augmentation
-    for index, aug in os.listdir(path_to_models_trained_on_diff_augs):
+    # Create an empty DataFrame
+    df = pd.DataFrame()
 
-        name = file_names[index]
+    # Itterate over each augmentation
+    for aug in os.listdir(path_to_models_trained_on_diff_augs):
 
         path_to_model_aug = f'{path_to_models_trained_on_diff_augs}/{aug}/'
 
@@ -82,7 +83,7 @@ if __name__ == '__main__':
         for file_name in file_names:
 
             # Load validation data
-            split = np.load(f'{root_to_split_details}fold_{file_name]}.npz')
+            split = np.load(f'{root_to_split_details}fold_{file_name}.npz')
             val_indices = split['val_indices']
             val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=len(val_indices), shuffle=False, drop_last=False)
             data_val, _, labels_val = next(iter(val_dataloader))
@@ -100,3 +101,29 @@ if __name__ == '__main__':
             probabilities_val = F.softmax(logits_val, dim=1) 
             y_hat_val = probabilities_val[:, 1].detach().numpy() 
             y_true_val = labels_val.detach().numpy()
+
+            # Apply metrics
+            tss_val = tss(y_true_val, y_hat_val)
+            auc_val = roc_auc_score(y_true_val, y_hat_val)
+            hss_val = hss(y_true_val, y_hat_val)
+            bss_val = calculate_brier_skill_score(y_true_val, y_hat_val)
+            accuracy_val = accuracy(y_true_val, y_hat_val)
+
+            # Append metrics to lists
+            running_tss_val.append(tss_val)
+            running_auc_val.append(auc_val)
+            running_hss_val.append(hss_val)
+            running_bss_val.append(bss_val)
+            running_acc_val.append(accuracy_val)
+
+            # Append metrics to DataFrame
+            row = pd.DataFrame({
+                'split': [file_name],
+                'augmentation': [aug],
+                'tss': [tss_val],
+                'auc': [auc_val],
+                'hss': [hss_val],
+                'bss': [bss_val],
+                'accuracy': [accuracy_val]
+            })
+            df = df.append(row, ignore_index=True)

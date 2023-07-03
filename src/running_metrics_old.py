@@ -116,7 +116,6 @@ if __name__ == '__main__':
         running_bss_val.append(bss_val)
         running_acc_val.append(accuracy_val)
     
-    cnn_df  = 
 
 
     # Store metics in a dictionary and save to disk
