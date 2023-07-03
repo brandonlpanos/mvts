@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
 
+# Metrics
 
 # Function to calculate AUC
 def roc_auc_score(y_true, y_score):
@@ -54,7 +55,6 @@ def tss(y_true, y_hat):
     tss_score = hit_rate - false_alarm_rate  # True Skill Score (TSS)
     return tss_score
 
-
 # Calculate metrics for ensemble of models to get robust statistics of validation set
 
 if __name__ == '__main__':
@@ -67,36 +67,64 @@ if __name__ == '__main__':
     running_acc_val = []
 
     # Collect filenames for all 50 models
-    root_to_split_details = '../kfold/splits/'
-    path_to_models_trained_on_diff_augs = '../models/'
-    file_names = np.array( [i for i in range(50) if i not in [27, 37]] )
+    path_to_splits = '../kfold/splits/'
+    file_names = np.arange(0, 50, 1)
+    file_names = np.delete(file_names, np.argwhere(file_names == 27))
+    file_names = np.delete(file_names, np.argwhere(file_names == 37))
 
-    # Itterate over each augmentation
-    for index, aug in os.listdir(path_to_models_trained_on_diff_augs):
+    # Loop over all 50 different splits
+    for file_name in file_names:
 
-        name = file_names[index]
+        print(file_name)
 
-        path_to_model_aug = f'{path_to_models_trained_on_diff_augs}/{aug}/'
+        # Load split indices
+        path = path_to_splits + 'fold_' + str(file_name) + '.npz'
+        fhand = np.load(path)
+        val_indices = fhand['val_indices']
 
-        # Itterate over each model trained on a partuclar split of the data
-        for file_name in file_names:
+        # Create dataloaders
+        val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=len(val_indices), shuffle=False, drop_last=False)
 
-            # Load validation data
-            split = np.load(f'{root_to_split_details}fold_{file_name]}.npz')
-            val_indices = split['val_indices']
-            val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=len(val_indices), shuffle=False, drop_last=False)
-            data_val, _, labels_val = next(iter(val_dataloader))
-            data_val = torch.nan_to_num(data_val)
-            data_val = data_val.unsqueeze_(1)
+        # Load validation data
+        data_val, _, labels_val = next(iter(val_dataloader))
+        data_val = torch.nan_to_num(data_val)
+        data_val = data_val.unsqueeze_(1)
 
-            # Load model
-            model = CNNModel()
-            model_path = f'{path_to_model_aug}/{file_name}.pth'
-            model.load_state_dict(torch.load(model_path))
-            model.eval()
+        # Load model
+        model = CNNModel()
+        path = '../kfold/models/cnn_model_standard_' + str(file_name) + '.pth'
+        model.load_state_dict(torch.load(path))
+        model.eval()
 
-            # Calculate y_hat and y_true for the validation set
-            logits_val = model(data_val)
-            probabilities_val = F.softmax(logits_val, dim=1) 
-            y_hat_val = probabilities_val[:, 1].detach().numpy() 
-            y_true_val = labels_val.detach().numpy()
+        # Calculate y_hat and y_true for the validation set
+        logits_val = model(data_val)
+        probabilities_val = F.softmax(logits_val, dim=1) 
+        y_hat_val = probabilities_val[:, 1].detach().numpy() 
+        y_true_val = labels_val.detach().numpy()
+
+        # Apply metrics
+        tss_val = tss(y_true_val, y_hat_val)
+        auc_val = roc_auc_score(y_true_val, y_hat_val)
+        hss_val = hss(y_true_val, y_hat_val)
+        bss_val = calculate_brier_skill_score(y_true_val, y_hat_val)
+        accuracy_val = accuracy(y_true_val, y_hat_val)
+
+        # Append metrics to lists
+        running_tss_val.append(tss_val)
+        running_auc_val.append(auc_val)
+        running_hss_val.append(hss_val)
+        running_bss_val.append(bss_val)
+        running_acc_val.append(accuracy_val)
+    
+    cnn_df  = 
+
+
+    # Store metics in a dictionary and save to disk
+    metrics = {
+        'running_tss_val': running_tss_val,
+        'running_auc_val': running_auc_val,
+        'running_hss_val': running_hss_val,
+        'running_bss_val': running_bss_val,
+        'running_acc_val': running_acc_val
+    }
+    with open('../data/metrics_standard_cnn.pkl', 'wb') as f: pickle.dump(metrics, f)
