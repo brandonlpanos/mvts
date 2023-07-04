@@ -1,11 +1,14 @@
+import os
 import torch
 import pickle
 import numpy as np
-from models import CNNModel
+import pandas as pd
 from sklearn import metrics
 import torch.nn.functional as F
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
+from models import CNNModel, TransformerEncoder, CombinedModel
+from normalizations import shuffle_tensor_along_time, topological_shuffle, unity_based_normalization, identity_normalization
 
 
 # Function to calculate AUC
@@ -38,7 +41,7 @@ def hss(y_true, y_hat):
     c = np.sum(y_pred == 1)  # Number of positive predictions
     d = np.sum(y_pred == 0)  # Number of negative predictions
     p0 = (a + b) / total_samples  # Overall agreement
-    pe = ((a + c) * (a + b) + (b + d) * (c + d)) / (total_samples ** 2)  # Expected agreement by chance
+    pe = ((a + c) * (a + b) + (b + d) * (c + d)) / (total_samples ** 2 - total_samples)  # Expected agreement by chance
     hss_score = (p0 - pe) / (1 - pe)  # HSS score
     return hss_score
 
@@ -55,17 +58,36 @@ def tss(y_true, y_hat):
     return tss_score
 
 
-# Calculate metrics for ensemble of models to get robust statistics of validation set
+# Dictionary for Normalization types
+norm_dictionary = {
+    'cnn_std': ['standard', 'identity_normalization'],
+    'cnn_std_shuffle': ['standard', 'shuffle_tensor_along_time'],
+    'cnn_std_topological': ['standard', 'topological_shuffle'],
+    'cnn_unity': ['unity', 'identity_normalization'],
+    'cnn_unity_shuffle': ['unity', 'shuffle_tensor_along_time'],
+    'cnn_unity_topological': ['unity', 'topological_shuffle'],
+    'combined_std': ['standard', 'identity_normalization'],
+    'combined_std_shuffle': ['standard', 'shuffle_tensor_along_time'],
+    'combined_std_topological': ['standard', 'topological_shuffle'],
+    'combined_unity': ['unity', 'identity_normalization'],
+    'combined_unity_shuffle': ['unity', 'shuffle_tensor_along_time'],
+    'combined_unity_topological': ['unity', 'topological_shuffle'],
+}
+
+def get_norm(norm_name):
+    if norm_name == 'identity_normalization':
+        return identity_normalization
+    elif norm_name == 'shuffle_tensor_along_time':
+        return shuffle_tensor_along_time
+    elif norm_name == 'topological_shuffle':
+        return topological_shuffle
+    elif norm_name == 'unity_based_normalization':
+        return unity_based_normalization
+    else: raise ValueError(f'Normalization {norm_name} not found!')
+
 
 if __name__ == '__main__':
-
-    # Initialize lists to store metrics
-    running_tss_val = []
-    running_auc_val = []
-    running_hss_val = []
-    running_bss_val = []
-    running_acc_val = []
-
+    
     # Collect filenames for all 50 models
     root_to_split_details = '../kfold/splits/'
     path_to_models_trained_on_diff_augs = '../models/'
@@ -74,33 +96,76 @@ if __name__ == '__main__':
     # Create an empty DataFrame
     df = pd.DataFrame()
 
+    # Set the device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # Itterate over each augmentation
     for aug in os.listdir(path_to_models_trained_on_diff_augs):
 
+        if aug == '.DS_Store': continue
+        base_norm, norm = norm_dictionary[aug][0], norm_dictionary[aug][1]
+        print(aug, base_norm, norm)
         path_to_model_aug = f'{path_to_models_trained_on_diff_augs}/{aug}/'
+
+        # Initialize lists to store metrics
+        running_tss_val = []
+        running_auc_val = []
+        running_hss_val = []
+        running_bss_val = []
+        running_acc_val = []
 
         # Itterate over each model trained on a partuclar split of the data
         for file_name in file_names:
 
+            if file_name == '.DS_Store': continue
+
             # Load validation data
             split = np.load(f'{root_to_split_details}fold_{file_name}.npz')
             val_indices = split['val_indices']
-            val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type='standard'), batch_size=len(val_indices), shuffle=False, drop_last=False)
+            val_dataloader = DataLoader(MVTSDataset(val_indices, norm_type=base_norm), batch_size=len(val_indices), shuffle=False, drop_last=False)
             data_val, _, labels_val = next(iter(val_dataloader))
-            data_val = torch.nan_to_num(data_val)
-            data_val = data_val.unsqueeze_(1)
 
-            # Load model
-            model = CNNModel()
-            model_path = f'{path_to_model_aug}/{file_name}.pth'
-            model.load_state_dict(torch.load(model_path))
-            model.eval()
+            if 'cnn' in aug:
+                data_val = get_norm(norm)(data_val)
+                data_val = torch.nan_to_num(data_val).to(device).unsqueeze(1) 
 
-            # Calculate y_hat and y_true for the validation set
-            logits_val = model(data_val)
-            probabilities_val = F.softmax(logits_val, dim=1) 
-            y_hat_val = probabilities_val[:, 1].detach().numpy() 
-            y_true_val = labels_val.detach().numpy()
+                # Load CNN model
+                model = CNNModel().to(device)
+                model_path = f'{path_to_model_aug}/{file_name}.pth'
+                model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+                model.eval()
+
+                # Calculate y_hat and y_true for the validation set
+                logits_val = model(data_val)
+                probabilities_val = F.softmax(logits_val, dim=1) 
+                y_hat_val = probabilities_val[:, 1].detach().numpy() 
+                y_true_val = labels_val.detach().numpy()
+
+            if 'combined' in aug:
+
+                # Load combined model
+                transformer_model = TransformerEncoder(feat_dim=35,
+                                                        max_len=40,
+                                                        d_model=35, 
+                                                        n_heads=7, 
+                                                        num_layers=1,
+                                                        dim_feedforward=256, 
+                                                        dropout=0.1, 
+                                                        freeze=True)
+
+                transformer_model.float()
+                cnn_model = CNNModel().float()
+                model = CombinedModel(transformer_model, cnn_model).float().to(device)
+                model_path = f'{path_to_model_aug}/{file_name}.pth'
+                model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+                model.eval()
+
+                padding_mask = find_padding_masks(data_val).to(device)
+                data_val = get_norm(norm)(data_val)
+                data_val = torch.nan_to_num(data_val).to(device)
+                logits_val = model(data_val, padding_mask).to(device)
+                y_hat_val = probabilities_val[:, 1].detach().numpy() 
+                y_true_val = labels_val.detach().numpy()
 
             # Apply metrics
             tss_val = tss(y_true_val, y_hat_val)
@@ -118,7 +183,6 @@ if __name__ == '__main__':
 
             # Append metrics to DataFrame
             row = pd.DataFrame({
-                'split': [file_name],
                 'augmentation': [aug],
                 'tss': [tss_val],
                 'auc': [auc_val],
@@ -126,4 +190,6 @@ if __name__ == '__main__':
                 'bss': [bss_val],
                 'accuracy': [accuracy_val]
             })
-            df = df.append(row, ignore_index=True)
+            df = pd.concat([df, row], ignore_index=True)
+
+            del model
