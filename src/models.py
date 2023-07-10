@@ -16,14 +16,17 @@ For mvts, one uses learned positional encodings and batch normalization in the t
 
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, dropout=0.1, freeze=False):
+    def __init__(self, feat_dim, max_len, d_model, n_heads, num_layers, dim_feedforward, dropout=0.1, freeze=False, batch_norm=False):
         super(TransformerEncoder, self).__init__()
         self.max_len = max_len
         self.d_model = d_model
         self.n_heads = n_heads
         self.project_inp = nn.Linear(feat_dim, d_model)
         self.pos_enc = LearnablePositionalEncoding(d_model, dropout=dropout*(1.0 - freeze), max_len=max_len)
-        encoder_layer = TransformerEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze))
+        if batch_norm:
+            encoder_layer = TransformerBatchNormEncoderLayer(d_model, n_heads, dim_feedforward, dropout*(1.0 - freeze))
+        else:
+            encoder_layer = TransformerEncoderLayer(d_model, self.n_heads, dim_feedforward, dropout*(1.0 - freeze))
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
         self.output_layer = nn.Linear(d_model, feat_dim)
         self.act = F.gelu
@@ -132,7 +135,7 @@ class TransformerBatchNormEncoderLayer(nn.modules.Module):
         dropout: the dropout value (default=0.1).
         activation: the activation function of intermediate layer, relu or gelu (default=relu).
     """
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
+    def __init__(self, d_model, nhead, dim_feedforward=256, dropout=0.1):
         super(TransformerBatchNormEncoderLayer, self).__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         # Implementation of Feedforward model
@@ -150,7 +153,7 @@ class TransformerBatchNormEncoderLayer(nn.modules.Module):
             state['activation'] = F.relu
         super(TransformerBatchNormEncoderLayer, self).__setstate__(state)
 
-    def forward(self, src: Tensor, src_mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
+    def forward(self, src, src_mask = None, src_key_padding_mask = None, is_causal = False):
         """
         Pass the input through the encoder layer.
         Args:
@@ -172,3 +175,4 @@ class TransformerBatchNormEncoderLayer(nn.modules.Module):
         src = self.norm2(src)
         src = src.permute(2, 0, 1)  # restore (seq_len, batch_size, d_model)
         return src
+    
