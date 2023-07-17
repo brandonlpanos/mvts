@@ -25,4 +25,8 @@ The dataset consists of roughly 250 positive and $250$ negative samples. In such
   <img width="500" src="static/modes.png">
 </p>
 
-In unsupervised denoising mode, the transformer learns to correctly fill in a masked version of the input, thus learning the correlations between the different channels. The resulting weights are now more optimally positioned on the loss landscape ("warmed up") and therefore requires fewer instances during the supervised task (classification mode) to converge. 
+In unsupervised denoising mode, the transformer learns to correctly fill in a masked version of the input, thus learning the correlations between the different channels. The resulting weights are now more optimally positioned on the loss landscape ("warmed up") and therefore requires fewer instances during the supervised task (classification mode) to converge.   
+
+Additionally, because of the sparsity of the dataset, it is important to eliminate random chance and increase the result’s robustness by performing kfold cross-validation, i.e., aggregating over results from different random splittings of the dataset into test and train sets. In our case, we simply generate 50 random splittings and aggregate all 50 model results. 
+
+Since our model is composed of a transformer, CNN hybrid, we can also use Guided Grad-CAM to retrieve saliency maps of the input which highlight the particular instances of the discriminant region, i.e., a visual explanation for what the model focused on for its classification decision. It is important to note that Grad-CAM after the transformer embedding is difficult to interpret over the original feature space. We use Grad-CAM as a novel way to rank order the input features.
