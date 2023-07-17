@@ -1,10 +1,10 @@
-data
-experiments
-.DS_Store
-__pycache__
-envmvts
-models
 figs
 temp
+data
 tests
-kfold
+models
+envmvts
+.DS_Store
+experiments
+__pycache__
+kfold_results
