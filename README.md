@@ -1,6 +1,6 @@
 ## Transformer-based sentiment analysis for flare prediction
 
-In this repo, we use a hybrid state-of-the-art transformer model to discover which structures in our multivariate time series (mvts) are important for flare prediction.
+In this repo, we use a hybrid state-of-the-art transformer model [(A. Vaswani)](https://arxiv.org/abs/1706.03762) to discover which structures in our multivariate time series (mvts) are important for flare prediction.
 The following figure shows the data acquisition process. We use the header information in the SWAN-SF [(R. A. Angryk et al. 2020)](https://doi.org/10.7910/DVN/EBCFKM) benchmark dataset to derive the flare maximum time and active region bounding box information. We then step four hours back in time and collect multi-channel image data from the Joint Science Operations Center (JSOC). This image data includes magnetic field information from the Solar Dynamic Observatory’s [(SDO, Lemen et al. 2012)](https://ui.adsabs.harvard.edu/abs/2012SoPh..275...17L/abstract), Helioseismic and Magnetic Imager [(HMI, Scherrer et al. 2012)](https://ui.adsabs.harvard.edu/abs/2012SoPh..275..207S/abstract) instrument as well as full atmospheric coverage of multiple scale heights from the Atmospheric Imaging Assembly [(AIA, R. J. Lemen, 2012 ](https://ui.adsabs.harvard.edu/abs/2012SoPh..275...17L/abstract) instrument.   
 
 <p align="center">
