@@ -31,9 +31,26 @@ Additionally, because of the sparsity of the dataset, it is important to elimina
 
 Since our model is composed of a transformer, CNN hybrid, we can also use Guided Grad-CAM [(R. R. Selvaraju et al. 2016)](https://arxiv.org/abs/1610.02391) to retrieve saliency maps of the input which highlight the particular instances of the discriminant region, i.e., a visual explanation for what the model focused on for its classification decision. It is important to note that Grad-CAM after the transformer embedding is difficult to interpret over the original feature space. We use Grad-CAM as a novel way to rank order the input features.  
 
-**Code**  
+**Code**    
 
-project  
+- `project/`
+  - `src/`
+    - `config.py`: high-level instructions for scripts
+    - `datasets.py`: script for loading data for denoising and classification tasks
+    - `losses.py`: contains loss functions for denoising and classification tasks
+    - `normalizations.py`: all augmentations for relaxing the structure of the input
+    - `kfold/`
+      - `kfold_cnn.py`: trains the cnn classifier over all 50 folds and saves the best model for each split
+      - `kfold_combined.py`: trains the transformer cnn hybrid classifier over all 50 folds and saves the best model for each split
+      - `kfold_grad_cam.py`: calculates attribution masks for each instance as aggregates over all 50 models
+    - `plotting/`
+      - `plot_x_x_masked.ipynb`: plots a random example of input and masked input as seen in the paper
+      - `plot_tree_maps.ipynb`: plots structure contributions in terms of TSS (relative square size)
+      - `plot_grad_cam.ipynb`: plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper
+      - `plot_feature_ranking.ipynb`: box plot for feature ranking vis saliency maps as shown in the paper
+
+
+<!-- project  
 |
 |-- src/
     |
@@ -54,4 +71,4 @@ project
         |-- plot_tree_maps.ipynb (plots structure contributions in terms of TSS (relative square size))
         |-- plot_grad_cam.ipynb (plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper)
         |-- plot_feature_ranking.ipynb (box plot for feature ranking vis saliency maps as shown in the paper)
-
+ -->
