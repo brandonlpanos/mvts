@@ -22,5 +22,5 @@ Each subplot is a different augmentation. The shapes represent different feature
 The dataset consists of roughly 250 posative and $250$ negative samples. In such a datasparse domain, it is advisable to first warm up the model wights using an autoregrasive denosing technique.
 
 <p align="center">
-  <img width="900" src="static/archetectures.png">
+  <img width="700" src="static/modes.png">
 </p>
