@@ -54,7 +54,7 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
   <img width="800" src="static/grad_cam.png">
 </p>
 
-Example from `plot_grad_cam.ipynb`: The top panel shows the mvts which is set to maximum structure (i.e., top left data augmentation). The middle panel is the salicany map derived as the agrigate of all 50 model's attributions. The botom panel decomposes each feature into into its consitituint light curves, with importnace overlayed as burnt orange. We see that the model focuses mostly on the Total magnitude of Lorentz force (TOTBSQ) $F\prop \sum B^2$
+Example from `plot_grad_cam.ipynb`: The top panel shows the mvts which is set to maximum structure (i.e., top left data augmentation). The middle panel is the salicany map derived as the agrigate of all 50 model's attributions. The botom panel decomposes each feature into into its consitituint light curves, with importnace overlayed as burnt orange. We see that the model focuses mostly on the Total magnitude of Lorentz force (TOTBSQ) $F\propto \sum B^2$
 
 
 <!-- project  
