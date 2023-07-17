@@ -9,6 +9,6 @@ Each image is converted into a single scalar summary statistic and concatenated 
 
 To examine the relative importance of channel, time order, and intensity structure within the data, we devise a set of data augmentations that gradually relax these structures and reduce the amount of information in the input. We then evaluate the model on each new augmentation and monitor its performance to deduce that particular structure’s importance. The set of augmentations can be seen in the following image:  
 
-![example](structure_decay.png)  
+<div style="text-align:center"><img src="structure_decay.png" width="800"/></div>
 
 Each subplot is a different augmentation. The shapes represent different feature channels (such as magnetic field strength etc.) while the size of each shape represents the intensity of the feature at a particular time. The maximum structure is in the top left, while the minimum structure is in the bottom right, where the model can only leverage the relative power spectrum of the input. 
