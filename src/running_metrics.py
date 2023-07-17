@@ -7,6 +7,7 @@ from sklearn import metrics
 import torch.nn.functional as F
 from datasets import MVTSDataset
 from torch.utils.data import DataLoader
+from datasets import find_padding_masks
 from models import CNNModel, TransformerEncoder, CombinedModel
 from normalizations import shuffle_tensor_along_time, topological_shuffle, unity_based_normalization, identity_normalization
 
@@ -164,6 +165,7 @@ if __name__ == '__main__':
                 data_val = get_norm(norm)(data_val)
                 data_val = torch.nan_to_num(data_val).to(device)
                 logits_val = model(data_val, padding_mask).to(device)
+                probabilities_val = F.softmax(logits_val, dim=1)
                 y_hat_val = probabilities_val[:, 1].detach().numpy() 
                 y_true_val = labels_val.detach().numpy()
 
@@ -193,3 +195,6 @@ if __name__ == '__main__':
             df = pd.concat([df, row], ignore_index=True)
 
             del model
+
+    # Save DataFrame
+    df.to_csv('../data/metrics.csv', index=False)

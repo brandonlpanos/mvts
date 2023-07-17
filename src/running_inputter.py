@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     # Set device, initiate optimizer, define loss criterion, and set number of epoch. Finally, train and validate the model
     critereon = MaskedMSELoss()
-    save_path = '../models/inputting_standard_norm.pt'
+    save_path = '../models/inputting_combined_std.pt'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     running_batch_loss_train, running_batch_loss_test = train_and_validate_inputer(model,

@@ -175,4 +175,3 @@ class TransformerBatchNormEncoderLayer(nn.modules.Module):
         src = self.norm2(src)
         src = src.permute(2, 0, 1)  # restore (seq_len, batch_size, d_model)
         return src
-    

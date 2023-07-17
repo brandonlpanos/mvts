@@ -92,7 +92,7 @@ if __name__ == '__main__':
     transformer_model.float()
 
     # Load pretrained weights
-    transformer_model.load_state_dict(torch.load('../models/inputting_standard_norm.pt'))
+    transformer_model.load_state_dict(torch.load('../models/inputting_combined_std.pt'))
 
     # Initiate the CNN model
     cnn_model = CNNModel().float()
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     n_epoch = 100
     train_loader = train_dataloader
     criterion = nn.CrossEntropyLoss()
-    save_path = '../models/classification_standard_norm.pt'
+    save_path = '../models/combined_std.pt'
     optimizer = torch.optim.Adam(main_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     main_model.to(device)
