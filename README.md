@@ -50,7 +50,9 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
     - `plot_feature_ranking.ipynb`: box plot for feature ranking via saliency maps as shown in the paper  
 - `running_metrics.py`: collects metrics from all 50 folds for each type of data augmentation and saves to a CSV file  
 
-**Running the code**
+<p align="center">
+  <img width="500" src="static/grad_cam.png">
+</p>
 
 
 <!-- project  
