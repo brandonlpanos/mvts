@@ -16,4 +16,11 @@ To examine the relative importance of channel, time order, and intensity structu
 </p>
 
 
-Each subplot is a different augmentation. The shapes represent different feature channels (such as magnetic field strength etc.) while the size of each shape represents the intensity of the feature at a particular time. The maximum structure is in the top left, while the minimum structure is in the bottom right, where the model can only leverage the relative power spectrum of the input.
+Each subplot is a different augmentation. The shapes represent different feature channels (such as magnetic field strength etc.) while the size of each shape represents the intensity of the feature at a particular time. The maximum structure is in the top left, while the minimum structure is in the bottom right, where the model can only leverage the relative power spectrum of the input.  
+
+
+The dataset consists of roughly 250 posative and $250$ negative samples. In such a datasparse domain, it is advisable to first warm up the model wights using an autoregrasive denosing technique.
+
+<p align="center">
+  <img width="700" src="static/archetectures.png">
+</p>
