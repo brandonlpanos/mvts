@@ -51,7 +51,7 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 - `running_metrics.py`: collects metrics from all 50 folds for each type of data augmentation and saves to a CSV file  
 
 <p align="center">
-  <img width="900" src="static/grad_cam.png">
+  <img width="800" src="static/grad_cam.png">
 </p>
 
 
