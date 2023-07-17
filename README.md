@@ -35,7 +35,7 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 
 
 - `src/`
-  - `config.py`: high-level instructions for scripts (controls the number of epochs plus type of augmentation)
+  - `config.py`: high-level instructions for scripts (controls the number of epochs plus type of augmentation, base (standard, unity) and active norm)
   - `datasets.py`: script for loading data for denoising and classification tasks
   - `losses.py`: contains loss functions for denoising and classification tasks
   - `normalizations.py`: all augmentations for relaxing the structure of the input
