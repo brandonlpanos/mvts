@@ -10,6 +10,14 @@ This file contains the dataset class for the autoregressive denoising task as we
 MVTSDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label. 
 '''
 
+#? Get absolute path of the current script
+# Get the absolute path of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Get the absolute path of the parent directory of the current script
+parent_dir = os.path.dirname(script_dir)
+# Construct the path to the data directory
+data_dir = os.path.join(parent_dir, 'data', 'long/')
+
 
 class MVTSDataset(Dataset):
     """Dynamically computes missingness (noise) mask for each sample"""
@@ -33,8 +41,8 @@ class MVTSDataset(Dataset):
 
         if self.norm_type == 'standard':
             dataframes = []
-            for file_name in os.listdir('../data/long/'):
-                df = pd.read_csv('../data/long/' + file_name)
+            for file_name in os.listdir(data_dir):
+                df = pd.read_csv(data_dir + file_name)
                 dataframes.append(df)
             df = pd.concat(dataframes, ignore_index=True)
             df = df.drop(['Unnamed: 0'], axis=1)
@@ -62,7 +70,7 @@ class MVTSDataset(Dataset):
             label: 1 or 0
         """
         index = self.indicies[idx]
-        df = pd.read_csv(f'../data/long/{index}.csv')
+        df = pd.read_csv(f'{data_dir}{index}.csv')
         if len(df) < 40:
             padding = pd.DataFrame(np.nan, index=np.arange(40 - len(df)), columns=df.columns)
             df = pd.concat([padding, df])
