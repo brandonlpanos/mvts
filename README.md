@@ -33,21 +33,21 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 
 **Code**    
 
-- `project/`
-  - `src/`
-    - `config.py`: high-level instructions for scripts
-    - `datasets.py`: script for loading data for denoising and classification tasks
-    - `losses.py`: contains loss functions for denoising and classification tasks
-    - `normalizations.py`: all augmentations for relaxing the structure of the input
-    - `kfold/`
-      - `kfold_cnn.py`: trains the cnn classifier over all 50 folds and saves the best model for each split
-      - `kfold_combined.py`: trains the transformer cnn hybrid classifier over all 50 folds and saves the best model for each split
-      - `kfold_grad_cam.py`: calculates attribution masks for each instance as aggregates over all 50 models
-    - `plotting/`
-      - `plot_x_x_masked.ipynb`: plots a random example of input and masked input as seen in the paper
-      - `plot_tree_maps.ipynb`: plots structure contributions in terms of TSS (relative square size)
-      - `plot_grad_cam.ipynb`: plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper
-      - `plot_feature_ranking.ipynb`: box plot for feature ranking vis saliency maps as shown in the paper
+
+- `src/`
+  - `config.py`: high-level instructions for scripts
+  - `datasets.py`: script for loading data for denoising and classification tasks
+  - `losses.py`: contains loss functions for denoising and classification tasks
+  - `normalizations.py`: all augmentations for relaxing the structure of the input
+  - `kfold/`
+    - `kfold_cnn.py`: trains the CNN classifier over all 50 folds and saves the best model for each split
+    - `kfold_combined.py`: trains the transformer-CNN hybrid classifier over all 50 folds and saves the best model for each split
+    - `kfold_grad_cam.py`: calculates attribution masks for each instance as aggregates over all 50 models
+  - `plotting/`
+    - `plot_x_x_masked.ipynb`: plots a random example of input and masked input as seen in the paper
+    - `plot_tree_maps.ipynb`: plots structure contributions in terms of TSS (relative square size)
+    - `plot_grad_cam.ipynb`: plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper
+    - `plot_feature_ranking.ipynb`: box plot for feature ranking via saliency maps as shown in the paper
 
 
 <!-- project  
