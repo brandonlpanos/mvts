@@ -35,7 +35,7 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 
 
 - `src/`
-  - `config.py`: high-level instructions for scripts
+  - `config.py`: high-level instructions for scripts (controls the number of epochs plus type of augmentation)
   - `datasets.py`: script for loading data for denoising and classification tasks
   - `losses.py`: contains loss functions for denoising and classification tasks
   - `normalizations.py`: all augmentations for relaxing the structure of the input
@@ -47,7 +47,10 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
     - `plot_x_x_masked.ipynb`: plots a random example of input and masked input as seen in the paper
     - `plot_tree_maps.ipynb`: plots structure contributions in terms of TSS (relative square size)
     - `plot_grad_cam.ipynb`: plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper
-    - `plot_feature_ranking.ipynb`: box plot for feature ranking via saliency maps as shown in the paper
+    - `plot_feature_ranking.ipynb`: box plot for feature ranking via saliency maps as shown in the paper  
+- `running_metrics.py`: collects metrics from all 50 folds for each type of data augmentation and saves to a CSV file  
+
+**Running the code**
 
 
 <!-- project  
