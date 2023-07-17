@@ -51,7 +51,7 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 - `running_metrics.py`: collects metrics from all 50 folds for each type of data augmentation and saves to a CSV file  
 
 <p align="center">
-  <img width="800" src="static/grad_cam.png">
+  <img width="700" src="static/grad_cam.png">
 </p>
 
 Example from `plot_grad_cam.ipynb`: The top panel shows the mvts which is set to maximum structure (i.e., top-left data augmentation). The middle panel is the saliency map derived as the aggregate of all 50 model attributions. The bottom panel decomposes each feature into its constituent light curves, with importance overlayed as burnt orange. We see that the model focuses mostly on the Total magnitude of Lorentz force (TOTBSQ) $\propto \sum B^2$.
