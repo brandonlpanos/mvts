@@ -90,6 +90,10 @@ if __name__ == "__main__":
                                                 freeze=False)
 
         transformer_model.float()
+        
+        # Load pretrained weights
+        transformer_model.load_state_dict(torch.load('../../models/inputting_combined_std.pt'))
+
         cnn_model = CNNModel().float()
         combined_model = CombinedModel(transformer_model, cnn_model).float().to(device)
 
