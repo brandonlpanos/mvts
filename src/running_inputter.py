@@ -56,7 +56,7 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_p
             y_hat, embeddings = model(x_masked, padding_mask)
             loss = critereon(y_hat, x, target_masks)
             optimizer.zero_grad()
-            loss.backward()
+            loss.backward() 
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=4.0)
             optimizer.step()
             running_batch_loss_train.append(loss.item())
