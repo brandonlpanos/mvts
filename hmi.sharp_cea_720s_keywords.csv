@@ -1,0 +1,216 @@
+name,type,recscope,defval,units,note,linkinfo,is_time,is_integer,is_real,is_numeric
+cparms_sg000,string,variable,compress Rice,none,,,False,False,False,False
+magnetogram_bzero,double,variable,0,none,,,False,False,True,True
+magnetogram_bscale,double,variable,0.1,none,,,False,False,True,True
+cparms_sg001,string,variable,,none,,,False,False,False,False
+bitmap_bzero,double,variable,0,none,,,False,False,True,True
+bitmap_bscale,double,variable,1,none,,,False,False,True,True
+cparms_sg002,string,variable,compress Rice,none,,,False,False,False,False
+Dopplergram_bzero,double,variable,0,none,,,False,False,True,True
+Dopplergram_bscale,double,variable,0.5,none,,,False,False,True,True
+cparms_sg003,string,variable,compress Rice,none,,,False,False,False,False
+continuum_bzero,double,variable,97304,none,,,False,False,True,True
+continuum_bscale,double,variable,3,none,,,False,False,True,True
+cparms_sg004,string,variable,compress Rice,none,,,False,False,False,False
+Bp_bzero,double,variable,0,none,,,False,False,True,True
+Bp_bscale,double,variable,0.01,none,,,False,False,True,True
+cparms_sg005,string,variable,compress Rice,none,,,False,False,False,False
+Bt_bzero,double,variable,0,none,,,False,False,True,True
+Bt_bscale,double,variable,0.01,none,,,False,False,True,True
+cparms_sg006,string,variable,compress Rice,none,,,False,False,False,False
+Br_bzero,double,variable,0,none,,,False,False,True,True
+Br_bscale,double,variable,0.01,none,,,False,False,True,True
+cparms_sg007,string,variable,compress Rice,none,,,False,False,False,False
+Bp_err_bzero,double,variable,0,none,,,False,False,True,True
+Bp_err_bscale,double,variable,0.001,none,,,False,False,True,True
+cparms_sg008,string,variable,compress Rice,none,,,False,False,False,False
+Bt_err_bzero,double,variable,0,none,,,False,False,True,True
+Bt_err_bscale,double,variable,0.001,none,,,False,False,True,True
+cparms_sg009,string,variable,compress Rice,none,,,False,False,False,False
+Br_err_bzero,double,variable,0,none,,,False,False,True,True
+Br_err_bscale,double,variable,0.001,none,,,False,False,True,True
+cparms_sg010,string,variable,compress Rice,none,,,False,False,False,False
+conf_disambig_bzero,double,variable,0,none,,,False,False,True,True
+conf_disambig_bscale,double,variable,1,none,,,False,False,True,True
+DATE,time,variable,-4712.01.01_11:59:28Z,ISO,Time that the SHARP keywords were calculated,,True,False,False,False
+DATE_S,time,variable,-4712.01.01_11:59:28Z,ISO,Date_time of generating Stokes data,,True,False,False,False
+DATE_B,time,variable,-4712.01.01_11:59:28Z,ISO,Date_time of generating Bharp data,,True,False,False,False
+DATE__OBS,time,variable,-4712.01.01_11:59:28.00Z,ISO,[DATE-OBS] DATE_OBS = T_OBS - EXPTIME/2.0,,True,False,False,False
+DATE-OBS,time,variable,-4712.01.01_11:59:28.00Z,ISO,[DATE-OBS] DATE_OBS = T_OBS - EXPTIME/2.0,,True,False,False,False
+T_OBS,time,variable,-4712.01.01_11:59:28_TAI,TAI,nominal time,,True,False,False,False
+T_REC,time,ts_eq,-4712.01.01_11:59:28_TAI,TAI,Slot time,,True,False,False,False
+T_REC_epoch,time,constant,1993.01.01_00:00:00_TAI,TAI,Time of origin,,True,False,False,False
+T_REC_step,float,constant,720.0,seconds,ts_eq step,,False,False,True,True
+T_REC_unit,string,constant,secs,none,ts_eq unit,,False,False,False,False
+CADENCE,float,constant,720.0,seconds,repetition interval,,False,False,True,True
+USFLUX,float,variable,nan,Maxwell,Total unsigned flux,,False,False,True,True
+MEANGAM,float,variable,nan,Degrees,"Mean inclination angle, gamma",,False,False,True,True
+MEANGBT,float,variable,nan,Gauss/Mm,Mean value of the total field gradient,,False,False,True,True
+MEANGBZ,float,variable,nan,Gauss/Mm,Mean value of the vertical field gradient,,False,False,True,True
+MEANGBH,float,variable,nan,Gauss/Mm,Mean value of the horizontal field gradient,,False,False,True,True
+MEANJZD,float,variable,nan,mA/(m^2),Mean vertical current density,,False,False,True,True
+TOTUSJZ,float,variable,nan,Amperes,Total unsigned vertical current,,False,False,True,True
+MEANALP,float,variable,nan,1/Mm,"Mean twist parameter, alpha",,False,False,True,True
+MEANJZH,float,variable,nan,(G^2)/m,Mean current helicity,,False,False,True,True
+TOTUSJH,float,variable,nan,(G^2)/m,Total unsigned current helicity,,False,False,True,True
+ABSNJZH,float,variable,nan,(G^2)/m,Absolute value of the net current helicity,,False,False,True,True
+SAVNCPP,float,variable,nan,Amperes,Sum of the Absolute Value of the Net Currents Per Polarity (SAVNCPP),,False,False,True,True
+MEANPOT,float,variable,nan,Ergs per cubic centimeter,Mean photospheric excess magnetic energy density,,False,False,True,True
+TOTPOT,float,variable,nan,Ergs per cubic centimeter,Total photospheric magnetic energy density,,False,False,True,True
+MEANSHR,float,variable,nan,Degrees,Mean shear angle for B_total,,False,False,True,True
+SHRGT45,float,variable,nan,Percentage of Total,Area with shear angle greater than 45 as a percent of total area,,False,False,True,True
+R_VALUE,float,variable,nan,Maxwell,"Unsigned Flux R (Schrijver, 2007)",,False,False,True,True
+GWILL,float,variable,nan,Mm,"GWILL (Mason & Hoeksema, 2010)",,False,False,True,True
+CTYPE1,string,constant,CRLN-CEA,none,CRLN-CEA,,False,False,False,False
+CTYPE2,string,constant,CRLT-CEA,none,CRLT-CEA,,False,False,False,False
+CRPIX1,float,variable,nan,pixel,X coordinate of patch center with respect to lower-left corner (in pixels),,False,False,True,True
+CRPIX2,float,variable,nan,pixel,Y coordinate of patch center with respect to lower-left corner (in pixels),,False,False,True,True
+CRVAL1,float,variable,0.000000,degree,Longitude at center of patch,,False,False,True,True
+CRVAL2,float,variable,0.000000,degree,Latitude at center of patch,,False,False,True,True
+CDELT1,float,variable,nan,degree,Map scale in X direction,,False,False,True,True
+CDELT2,float,variable,nan,degree,Map scale in Y direction,,False,False,True,True
+CUNIT1,string,constant,degree,none,Degree,,False,False,False,False
+CUNIT2,string,constant,degree,none,Degree,,False,False,False,False
+IMCRPIX1,float,variable,nan,pixel,Location of the Sun center in CCD x direction,,False,False,True,True
+IMCRPIX2,float,variable,nan,pixel,Location of the Sun center in CCD y direction,,False,False,True,True
+IMCRVAL1,float,variable,0.000000,arcsec,x origin - center of the solar disk,,False,False,True,True
+IMCRVAL2,float,variable,0.000000,arcsec,y origin - center of the solar disk,,False,False,True,True
+CROTA2,float,variable,nan,deg,CROTA2: INST_ROT + SAT_ROT,,False,False,True,True
+CRDER1,float,variable,nan,arcsec,CRDER1: estimate of random error in coordinate x,,False,False,True,True
+CRDER2,float,variable,nan,arcsec,CRDER2: estimate of random error in coordinate y,,False,False,True,True
+CSYSER1,float,variable,nan,arcsec,CSYSER1: estimate of systematic error in coordinate x,,False,False,True,True
+CSYSER2,float,variable,nan,arcsec,CSYSER2: estimate of systematic error in coordinate y,,False,False,True,True
+WCSNAME,string,constant,Carrington Heliographic,none,WCS system name,,False,False,False,False
+DSUN_OBS,double,variable,nan,meters,Distance from SDO to Sun center.,,False,False,True,True
+DSUN_REF,double,constant,149597870691,meters,Astronomical Unit,,False,False,True,True
+RSUN_REF,double,constant,696000000,m,"Reference radius of the Sun: 696,000,000.0 m",,False,False,True,True
+CRLN_OBS,float,variable,nan,deg,Carrington longitude of the observer,,False,False,True,True
+CRLT_OBS,float,variable,nan,deg,Carrington latitude of the observer,,False,False,True,True
+CAR_ROT,int,variable,-2147483648,none,Carrington rotation number of CRLN_OBS,,False,True,False,True
+OBS_VR,double,variable,nan,m/s,velocity of the observer in radial direction. + is away from Sun,,False,False,True,True
+OBS_VW,double,variable,nan,m/s,velocity of the observer solar-westward. + in rough direction of Earth orbit,,False,False,True,True
+OBS_VN,double,variable,nan,m/s,velocity of the observer solar-northward (heliographic). + to north,,False,False,True,True
+RSUN_OBS,double,variable,nan,arcsec,angular radius of Sun. Corresponds to arcsin(RSUN_REF/DSUN_OBS),,False,False,True,True
+TELESCOP,string,constant,SDO/HMI,none,For HMI: SDO/HMI,,False,False,False,False
+INSTRUME,string,variable,,none,"For HMI: HMI_SIDE1, HMI_FRONT2, or HMI_COMBINED",,False,False,False,False
+WAVELNTH,float,constant,6173.0,Angstrom,For HMI: 6173.3 Angstroms,,False,False,True,True
+CAMERA,int,variable,-2147483648,none,"For HMI: 1 (side camera), 2 (front camera), or 3 (both cameras)",,False,True,False,True
+QUALITY,int,variable,0x80000000,none,SHARP Quality index,,False,True,False,True
+QUAL_S,int,variable,0x80000000,none,Level 1p Quality word,,False,True,False,True
+QUALLEV1,int,variable,0x80000000,none,Logical OR on the bits of the level 1 Quality word,,False,True,False,True
+BUNIT,string,segment,,none,BUNIT: physical units of each data segment,,False,False,False,False
+ORIGIN,string,constant,SDO/JSOC-SDP,none,ORIGIN: location where file made,,False,False,False,False
+CONTENT,string,constant,HMI observable,none,CONTENT,,False,False,False,False
+HISTORY,string,variable, ,none,history of data,,False,False,False,False
+COMMENT,string,variable, ,none,commentary on the data,,False,False,False,False
+BLD_VERS,string,variable, ,none,JSOC-build version number,,False,False,False,False
+CALVER64,longlong,variable,0x0000000000000000,none,Calibration Version,,False,True,False,True
+CODEVER7,string,variable,Blank,none,CVS Version of sharp module,,False,False,False,False
+HFLID,int,variable,-2147483648,none,HMI_SEQ_ID_FRAMELIST,,False,True,False,True
+HCFTID,int,variable,-2147483648,none,HMI_SEQ_ID_FOCUS,,False,True,False,True
+QLOOK,int,constant,0,none,"QLOOK: 0=final data, 1=quick-look data",,False,True,False,True
+HARPNUM,int,variable,-2147483648,none,HARP ID,,False,True,False,True
+MASK,int,variable,64,none,Lower threshold for membership in this patch,,False,True,False,True
+ARM_QUAL,int,variable,0x80000000,none,Quality of the mask (bitfield),,False,True,False,True
+ARM_NCLN,int,variable,-2147483648,none,Number of limb pixels reset to quiet (annulus width ARM_EDGE),,False,True,False,True
+H_MERGE,int,variable,0,none,1 if this HARP merged with an existing region at this time,,False,True,False,True
+H_FAINT,int,variable,0,none,1 if this HARP had faint contrast at this time,,False,True,False,True
+ARM_MODL,string,variable,,none,ARmask parameter: Classification model name,,False,False,False,False
+ARM_EDGE,float,variable,nan,none,ARmask parameter: Width of annulus at limb to possibly reset (pixels),,False,False,True,True
+ARM_BETA,string,variable,,none,ARmask parameter: Mask spatial smoothness,,False,False,False,False
+LATDTMIN,float,variable,nan,degree,Minimum latitude for disk transit,,False,False,True,True
+LONDTMIN,float,variable,nan,degree,Minimum longitude for disk transit,,False,False,True,True
+LATDTMAX,float,variable,nan,degree,Maximum latitude for disk transit,,False,False,True,True
+LONDTMAX,float,variable,nan,degree,Maximum longitude for disk transit,,False,False,True,True
+OMEGA_DT,float,variable,nan,degree/day,Rotation rate over disk transit,,False,False,True,True
+NPIX,int,variable,-2147483648,none,Number of pixels within the patch,,False,True,False,True
+SIZE,float,variable,nan,mH,Projected area of patch on image in micro-hemisphere,,False,False,True,True
+AREA,float,variable,nan,mH,De-projected area of patch on sphere in micro-hemisphere,,False,False,True,True
+NACR,int,variable,-2147483648,none,Number of active pixels in patch,,False,True,False,True
+SIZE_ACR,float,variable,nan,mH,Projected area of active pixels on image in micro-hemisphere,,False,False,True,True
+AREA_ACR,float,variable,nan,mH,De-projected area of active pixels on sphere in micro-hemisphere,,False,False,True,True
+MTOT,float,variable,nan,weber,Sum of absolute LoS flux within the identified region,,False,False,True,True
+MNET,float,variable,nan,weber,Net LoS flux within the identified region,,False,False,True,True
+MPOS_TOT,float,variable,nan,weber,Absolute value of total positive LoS flux,,False,False,True,True
+MNEG_TOT,float,variable,nan,weber,Absolute value of total negative LoS flux,,False,False,True,True
+MMEAN,float,variable,nan,gauss,Mean of LoS flux density,,False,False,True,True
+MSTDEV,float,variable,nan,gauss,Standard deviation of LoS flux density,,False,False,True,True
+MSKEW,float,variable,nan,none,Skewness of LoS flux density,,False,False,True,True
+MKURT,float,variable,nan,none,Kurtosis of LoS flux density,,False,False,True,True
+LAT_MIN,float,variable,nan,degree,Minimum Stonyhurst latitude of pixels within the patch,,False,False,True,True
+LON_MIN,float,variable,nan,degree,Minimum Stonyhurst longitude of pixels within the patch,,False,False,True,True
+LAT_MAX,float,variable,nan,degree,Maximum Stonyhurst latitude of pixels within the patch,,False,False,True,True
+LON_MAX,float,variable,nan,degree,Maximum Stonyhurst longitude of pixels within the patch,,False,False,True,True
+LAT_FWT,float,variable,nan,degree,Stonyhurst latitude of flux-weighted center of active pixels,,False,False,True,True
+LON_FWT,float,variable,nan,degree,Stonyhurst longitude of flux-weighted center of active pixels,,False,False,True,True
+LAT_FWTPOS,float,variable,nan,degree,Stonyhurst latitude of flux-weighted center of positive flux,,False,False,True,True
+LON_FWTPOS,float,variable,nan,degree,Stonyhurst longitude of flux-weighted center of positive flux,,False,False,True,True
+LAT_FWTNEG,float,variable,nan,degree,Stonyhurst latitude of flux-weighted center of negative flux,,False,False,True,True
+LON_FWTNEG,float,variable,nan,degree,Stonyhurst longitude of flux-weighted center of negative flux,,False,False,True,True
+T_FRST,time,variable,-4712.01.01_11:59:28_TAI,TAI,First T_REC stored for HARP (includes temporal pad),,True,False,False,False
+T_FRST1,time,variable,-4712.01.01_11:59:28_TAI,TAI,T_REC of initial HARP detection,,True,False,False,False
+T_LAST1,time,variable,-4712.01.01_11:59:28_TAI,TAI,T_REC of final HARP detection,,True,False,False,False
+T_LAST,time,variable,-4712.01.01_11:59:28_TAI,TAI,Last T_REC stored for HARP (includes temporal pad),,True,False,False,False
+N_PATCH,int,variable,-2147483648,none,Image slots spanned by HARP (includes pad),,False,True,False,True
+N_PATCH1,int,variable,-2147483648,none,Image slots spanned by HARP (excludes pad),,False,True,False,True
+N_PATCHM,int,variable,-2147483648,none,Missing images/slots in unpadded HARP interval,,False,True,False,True
+NOAA_AR,int,variable,-2147483648,none,NOAA AR number that best matches this HARP,,False,True,False,True
+NOAA_NUM,int,variable,-2147483648,none,Number of NOAA ARs that match this HARP (0 allowed),,False,True,False,True
+NOAA_ARS,string,variable,,none,Comma-separated list of NOAA ARs matching this HARP,,False,False,False,False
+INVCODEV,string,variable,,none,Version of VFISV code,,False,False,False,False
+INVDOCU,string,variable,,none,Document for VFISV code,,False,False,False,False
+INVITERA,int,variable,-1,none,Number of iterations of VFISV,,False,True,False,True
+INVSTLGT,string,variable,,none,Flag for stray light. No means that the stray light is not accounted for.,,False,False,False,False
+INVFLPRF,string,variable,,none,Flag/Comment on filter-profile,,False,False,False,False
+INVPHMAP,string,variable,,none,Flag/Comment on phase map,,False,False,False,False
+INVVLAVE,double,variable,nan,Maxwell,[USFLUXL] Total unsigned flux,,False,False,True,True
+USFLUXL,double,variable,nan,Maxwell,[USFLUXL] Total unsigned flux,,False,False,True,True
+INVBLAVE,double,variable,nan,Gauss/Mm,[MEANGBL] Mean value of the line-of-sight field gradient,,False,False,True,True
+MEANGBL,double,variable,nan,Gauss/Mm,[MEANGBL] Mean value of the line-of-sight field gradient,,False,False,True,True
+INVBBAVE,double,variable,nan,gauss,avarage of inverted field strength over processed pixels,,False,False,True,True
+INVNPRCS,int,variable,-1,number,[CMASKL] Number of pixels that contributed to the calculation of MEANGBL and USFLUXL,,False,True,False,True
+CMASKL,int,variable,-1,number,[CMASKL] Number of pixels that contributed to the calculation of MEANGBL and USFLUXL,,False,True,False,True
+INVNCNVG,int,variable,-1,none,Numer of pixels at which ME VFISV converged,,False,True,False,True
+AMBCODEV,string,variable,,none,Version of Disambig code,,False,False,False,False
+AMBDOCU,string,variable,,none,Document for Disambig code,,False,False,False,False
+AMBGMTRY,int,variable,-2147483648,none,Flag determining whether to use planar or spherical geometry,,False,True,False,True
+AMBPATCH,int,variable,-2147483648,none,"Flag determining whether disambiguation is done on a patch or full disk, 1 for patch",,False,True,False,True
+AMBWEAK,int,variable,-2147483648,none,Flag determining method for disambiguating weak field pixels,,False,True,False,True
+AMBNEROD,int,variable,-2147483648,pixels,Number of pixels by which to erode map of above threshold pixels,,False,True,False,True
+AMBNGROW,int,variable,-2147483648,pixels,Number of pixels by which to grow eroded map,,False,True,False,True
+AMBNPAD,int,variable,-2147483648,pixels,Padding to use in potential field calculation,,False,True,False,True
+AMBNAP,int,variable,-2147483648,pixels,Width of apodizing window in potential field calculation,,False,True,False,True
+AMBNTX,int,variable,-2147483648,none,Number of tiles to use in x-direction for potential field calculation,,False,True,False,True
+AMBNTY,int,variable,-2147483648,none,Number of tiles to use in y-direction for potential field calculation,,False,True,False,True
+AMBBTHR0,double,variable,nan,G,Transverse field strength threshold at disk center for using simulated annealing,,False,False,True,True
+AMBBTHR1,double,variable,nan,G,Transverse field strength threshold at limb for using simulated annealing,,False,False,True,True
+AMBSEED,int,variable,-2147483648,none,Input random number seed,,False,True,False,True
+AMBNEQ,int,variable,-2147483648,none,Number of reconfigurations attempted at each temperature setting,,False,True,False,True
+AMBLMBDA,double,variable,nan,none,Weighting factor between divergence and vertical current density,,False,False,True,True
+AMBTFCT0,double,variable,nan,none,Input factor to scale initial temperature,,False,False,True,True
+AMBTFCTR,double,variable,nan,none,Input factor to reduce temperature,,False,False,True,True
+DATAVALS,int,segment,-2147483648,none,Actual number of data values in images (pixels),,False,True,False,True
+MISSVALS,int,segment,-2147483648,none,Missing values,,False,True,False,True
+DATAMIN,float,segment,nan,none,Minimum value from pixels within 99% of solar radius,,False,False,True,True
+DATAMAX,float,segment,nan,none,Maximum value from pixels within 99% of solar radius,,False,False,True,True
+DATAMEDN,float,segment,nan,none,Median value from pixels within 99% of solar radius,,False,False,True,True
+DATAMEAN,float,segment,nan,none,Mean value from pixels within 99% of solar radius,,False,False,True,True
+DATARMS,float,segment,nan,none,Rms deviation from the mean value of pixels within 99% of solar radius,,False,False,True,True
+T_REC_index,longlong,index,0,none,Index keyword associated with T_REC,,False,True,False,True
+ERRGAM,float,variable,nan,Degrees,"Error in Mean inclination angle, gamma",,False,False,True,True
+ERRTAI,float,variable,nan,(G^2)/m,Absolute value of the net current helicity,,False,False,True,True
+ERRBH,float,variable,nan,Gauss/Mm,Error in Mean value of the horizontal field gradient,,False,False,True,True
+ERRMPOT,float,variable,nan,Ergs per cubic centimeter,Error in Mean photospheric excess magnetic energy density,,False,False,True,True
+ERRBT,float,variable,nan,Gauss/Mm,Error in Mean value of the total field gradient,,False,False,True,True
+ERRTUI,float,variable,nan,(G^2)/m,Total unsigned current helicity,,False,False,True,True
+ERRBZ,float,variable,nan,Gauss/Mm,Error in Mean value of the vertical field gradient,,False,False,True,True
+CMASK,float,variable,nan,number,Number of pixels that contributed to the spaceweather calculation,,False,False,True,True
+ERRJZ,float,variable,nan,mA/(m^2),Error in Mean vertical current density,,False,False,True,True
+ERRVF,float,variable,nan,Maxwell,Error in Total unsigned flux,,False,False,True,True
+ERRALP,float,variable,nan,1/Mm,"Error in Mean twist parameter, alpha",,False,False,True,True
+ERRMIH,float,variable,nan,(G^2)/m,Mean current helicity,,False,False,True,True
+ERRMSHA,float,variable,nan,Degrees,Error in Mean shear angle for B_total,,False,False,True,True
+ERRUSI,float,variable,nan,Amperes,Error in Total unsigned vertical current,,False,False,True,True
+DOFFSET,int,variable,-2147483648,Gauss,Constant value added to the noise mask for disambiguation.,,False,True,False,True
+ERRTPOT,float,variable,nan,Ergs per cubic centimeter,Error in Total photospheric magnetic energy density,,False,False,True,True
+ERRJHT,float,variable,nan,Amperes,Sum of the Absolute Value of the Net Currents Per Polarity (SAVNCPP),,False,False,True,True

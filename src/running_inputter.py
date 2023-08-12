@@ -26,7 +26,7 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_p
 
     The traning loop saves the model with the lowest test loss to '../models/inputting_unity_norm.pt'.
     
-    Autoregressive denoising requres several maskes, filters and dtypses:
+    Autoregressive denoising requres several maskes, filters and dtypes:
     1) traget = (batch, max_seq_len, feat_dim) tensor with missing values at the beginning replaced by 0
     2) mask = (batch, max_seq_len, feat_dim) boolean tensor
     3) padding_mask = (batch, max_seq_len) boolean tensor, 1 means keep, 0 means ignore dtype=torch.bool
@@ -56,7 +56,7 @@ def train_and_validate_inputer(model, train_loader, test_loader, n_epoch, save_p
             y_hat, embeddings = model(x_masked, padding_mask)
             loss = critereon(y_hat, x, target_masks)
             optimizer.zero_grad()
-            loss.backward() 
+            loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=4.0)
             optimizer.step()
             running_batch_loss_train.append(loss.item())
