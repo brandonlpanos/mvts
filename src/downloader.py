@@ -473,10 +473,13 @@ if __name__ == '__main__':
         with fits.open(path_to_vel) as hdul:
             vel_im = hdul[1].data  # Accessing the image is in the primary HDU
 
-            # Extract the date time from file name and reform it
-            t_obs_vel = path_to_vel.split('/')[-1]
-            t_obs_vel = t_obs_vel.split('.')[2] + '_' + t_obs_vel.split('.')[3]
-            t_obs_vel = t_obs_vel[:4] + '.' + t_obs_vel[4:6] + '.' + t_obs_vel[6:8] + '_' + t_obs_vel[9:11] + ':' + t_obs_vel[11:13] + ':' + t_obs_vel[13:15] + '.' + '000_TAI'
+            # # Extract the date time from file name and reform it
+            # t_obs_vel = path_to_vel.split('/')[-1]
+            # t_obs_vel = t_obs_vel.split('.')[2] + '_' + t_obs_vel.split('.')[3]
+            # t_obs_vel = t_obs_vel[:4] + '.' + t_obs_vel[4:6] + '.' + t_obs_vel[6:8] + '_' + t_obs_vel[9:11] + ':' + t_obs_vel[11:13] + ':' + t_obs_vel[13:15] + '.' + '000_TAI'
+
+            vel_header = hdul[1].header
+            t_obs_vel = vel_header['T_OBS']
 
             # Convert time strings to datetime objects
             target_datetime = datetime.strptime(t_obs_vel, time_format)
