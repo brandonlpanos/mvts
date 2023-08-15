@@ -153,8 +153,13 @@ def use_bitmap(data, bitmap):
 if __name__ == '__main__':
 
     # Select the NOAA active region of interest, as well as the partition it belongs to
-    NOAA_AR = '4920'
-    partition = 'partition4'
+    # NOAA_AR = '4920'
+    # partition = 'partition4'
+
+    NOAA_AR = '3364'
+    partition = 'partition3'
+
+    # 264
 
     # All SDO instruments of interest and their associated channels
     euv_data_types = {'lev1_euv_12s': ['94','131','171','193','211','304','335']}
@@ -203,7 +208,8 @@ if __name__ == '__main__':
     client = drms.Client()
 
     flare_cls = 'M'
-    max_loc = 1543
+    # max_loc = 1543
+    max_loc = 1600
 
     save_dir_ar_obs = f'{save_dir_ar}{flare_cls}_{max_loc}' # unique save directory e.g., X_420
     loc = max_loc - n_points # select data unit in SWAN-SF dataset 3 hours before flare
@@ -237,7 +243,7 @@ if __name__ == '__main__':
             out_dir = os.path.join(band_save_dir)
             if not os.path.exists(out_dir): os.makedirs(out_dir)
             # Construct the drms query string: either "series[timespan][wavelength]"
-            qstr = 'aia.lev1_euv_12s['+t_reform1+'/210h@6m]['+band+']{image}' #! changed from the original 4h@6m to 210h@6m
+            qstr = 'aia.lev1_euv_12s['+t_reform1+'/264h@6m]['+band+']{image}' #! changed from the original 4h@6m to 264h@6m
             # Reformulate the time argument
             t_reform2 = t_ref.replace(' ', 'T')
             # Download a seiries of images given the bounding boxes
@@ -293,7 +299,7 @@ if __name__ == '__main__':
             out_dir = os.path.join(band_save_dir)
             if not os.path.exists(out_dir): os.makedirs(out_dir)
             # Construct the drms query string: either "series[timespan][wavelength]"
-            qstr = 'aia.lev1_uv_24s['+t_reform1+'/210h@6m]['+band+']{image}'
+            qstr = 'aia.lev1_uv_24s['+t_reform1+'/264h@6m]['+band+']{image}'
             # Download a seiries of images given the bounding boxes
             process = {'im_patch': {'t_ref': t_reform2,
                                     't': 0,
@@ -346,7 +352,7 @@ if __name__ == '__main__':
     out_dir = os.path.join(band_save_dir)
     if not os.path.exists(out_dir): os.makedirs(out_dir)
     # Construct the drms query string: either "series[timespan][wavelength]"
-    qstr = 'hmi.M_45s['+t_reform1+'/210h@6m][2]{image}'
+    qstr = 'hmi.M_45s['+t_reform1+'/264h@6m][2]{image}'
     # Download a seiries of images given the bounding boxes
     process = {'im_patch': {'t_ref': t_reform2,
                             't': 0,
@@ -399,7 +405,7 @@ if __name__ == '__main__':
     out_dir = os.path.join(band_save_dir)
     if not os.path.exists(out_dir): os.makedirs(out_dir)
     # Construct the drms query string: either "series[timespan][wavelength]"
-    qstr = f'hmi.sharp_cea_720s[{NOAA_AR}]['+t_reform1+'/210h@6m]{bitmap}'
+    qstr = f'hmi.sharp_cea_720s[{NOAA_AR}]['+t_reform1+'/264h@6m]{bitmap}'
     result = client.export(qstr, method='url',protocol='fits',email='brandon.panos@fhnw.ch')
     result.download(out_dir)
 
@@ -432,7 +438,7 @@ if __name__ == '__main__':
     out_dir = os.path.join(band_save_dir)
     if not os.path.exists(out_dir): os.makedirs(out_dir)
     # Construct the drms query string: either "series[timespan][wavelength]"
-    qstr = 'hmi.V_45s['+t_reform1+'/210h@6m][2]{image}'
+    qstr = 'hmi.V_45s['+t_reform1+'/264h@6m][2]{image}'
     # Download a seiries of images given the bounding boxes
     process = {'im_patch': {'t_ref': t_reform2,
                             't': 0,
