@@ -7,7 +7,7 @@ from sklearn.preprocessing import RobustScaler
 
 '''
 This file contains the dataset class for the autoregressive denoising task as well as the classification task.
-MVTSDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label. 
+MVTSDataset: Dynamically computes missingness (noise) mask for each sample and outputs the sample, mask, and label.
 '''
 
 #? Get absolute path of the current script
