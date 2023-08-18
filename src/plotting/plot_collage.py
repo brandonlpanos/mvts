@@ -42,6 +42,10 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
 
     n_void = np.isnan(mvts[0]).sum()
 
+    percent_point = max_val / 40
+    mx = int(180 * percent_point)
+    mx = 180 - mx
+
     fig = plt.figure(figsize=(6, 25))
     gs = gridspec.GridSpec(5, 3, height_ratios=[1, 1, 1, 1, 4], width_ratios=[1, 1, 1], hspace=0.2, wspace=0.3)
     with open('/home/panosb/custom_cmap.pkl', 'rb') as f: custom_cmap = pickle.load(f)
@@ -61,7 +65,7 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
     ax1.tick_params(which='major', length=5,width=1)
     ax1.tick_params(which='minor', length=3,width=1)
     # Plot vertical line at max value of attribution mask
-    ax1.axvline(x=max_val, color='w', linestyle='--', linewidth=1)
+    ax1.axvline(x=mx, color='w', linestyle='--', linewidth=1)
     cbar1 = plt.colorbar(im1, cax=ax1.inset_axes([1.01, 0, 0.01, 1]), aspect=10)
     cbar1.set_label('Intensity')
     cbar1.ax.set_yticks([]) 
@@ -82,7 +86,7 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
     ax2.tick_params(which='major', length=5,width=1)
     ax2.tick_params(which='minor', length=3,width=1)
     # Plot vertical line at max value of attribution mask
-    ax2.axvline(x=max_val, color='w', linestyle='--', linewidth=1)
+    ax2.axvline(x=mx, color='w', linestyle='--', linewidth=1)
     cbar2 = plt.colorbar(im2, cax=ax2.inset_axes([1.01, 0, 0.01, 1]), aspect=10)
     cbar2.set_label('Intensity')
     cbar2.ax.set_yticks([]) 
@@ -193,7 +197,7 @@ def plot_fits_images(fits_paths, save_name=None):
             vmin_val, vmax_val = np.percentile(data, [1, 99])
             c_bar_label = 'Velocity [m/s]'
 
-        ax.imshow(data, origin='lower', cmap=cmap, vmin=vmin_val, vmax=vmax_val, alpha=0.7)
+        ax.imshow(data, origin='lower', cmap=cmap, vmin=vmin_val, vmax=vmax_val, alpha=0.7, aspect='equal')
         ax.set_title(title)
         ax.coords.grid(True, color='white', ls='--')
         ax.coords[0].set_axislabel('Solar X [arcsec]')
@@ -277,6 +281,7 @@ if __name__ == '__main__':
         deep_path = f'/home/panosb/sml/bpanos/old/mvts/downloads_lowcad/{noaa}/'
         files_for_active_region = [file for file in os.listdir(deep_path)]
         max_loc = csv_to_fits_map['csv_' + str(csv_indx)][1]
+
         for file in files_for_active_region:
             if str(max_loc) in file:
                 leaf_name = file
@@ -288,11 +293,14 @@ if __name__ == '__main__':
         for subdir in os.listdir(deep_path):
             if subdir == 'ndarrays' or subdir == '.DS_Store' or subdir == 'vids': continue
             files_in_sub = sorted(os.listdir(deep_path + subdir))
-            fits_paths.append(deep_path + subdir + '/' + files_in_sub[max_val_t_loc])
 
-        obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_{csv_indx}')
+            file_loc = max_val_t_loc - (40 - len(files_in_sub))
+
+            fits_paths.append(deep_path + subdir + '/' + files_in_sub[file_loc])
+
+        obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_{csv_indx}_prob_{mean_probability:.2f}')
 
         # plot agrigate heatmap and data for the sample
-        plot_attributions(mvts, attribution_mask, obs_date_time, max_val=max_val_t_loc, name=f'heatmap_{csv_indx}')
+        plot_attributions(mvts, attribution_mask, obs_date_time, max_val=max_val_t_loc, name=f'heatmap_{csv_indx}_prob_{mean_probability:.2f}')
 
         csv_indx += 1
