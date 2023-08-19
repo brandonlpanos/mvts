@@ -131,24 +131,35 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
 
     return None
 
+import numpy as np
+
 def unity_based_normalization(data):
     '''
-    Normalize each row of the data matrix by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
-    Takes in arrays of shape (features, time)
+    Normalize each row of the data matrix by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1.
+    Takes in arrays of shape (features, time).
     '''
-    # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
     # Get the maximum and minimum values of each row
     max_vals = np.nanmax(data, axis=1)
     min_vals = np.nanmin(data, axis=1)
+
     # Compute the range of each row, and add a small constant to avoid division by zero
     ranges = max_vals - min_vals
     eps = np.finfo(data.dtype).eps  # machine epsilon for the data type
     ranges[ranges < eps] = eps
-    # Normalize each row by subtracting its minimum value, dividing by its range, and scaling to a range of 0-1
-    data = (data - min_vals[:, np.newaxis]) / ranges[:, np.newaxis]
-    data = data + np.nanmax(data)
-    data *= (1 / np.nanmax(data, axis=1)[:, np.newaxis])
-    return data
+
+    # Normalize each row by subtracting its minimum value, dividing by its range
+    normalized_data = (data - min_vals[:, np.newaxis]) / ranges[:, np.newaxis]
+
+    # Check rows with valid maximum values before scaling to a range of 0-1
+    max_vals_normalized = np.nanmax(normalized_data, axis=1)
+    valid_rows = ~np.isnan(max_vals_normalized) & (max_vals_normalized != 0)
+        
+    # Scale only valid rows to a range of 0-1
+    normalized_data[valid_rows] += max_vals_normalized[valid_rows][:, np.newaxis]
+    normalized_data[valid_rows] *= (1 / max_vals_normalized[valid_rows][:, np.newaxis])
+    
+    return normalized_data
+
 
 def plot_fits_images(fits_paths, save_name=None):
     '''
@@ -231,8 +242,8 @@ if __name__ == '__main__':
     data, _, labels = next(iter(dataloader))
 
     # Calculate mean and std probability for each sample
-    csv_indx = 0
-    for mvts, y in zip(data, labels):
+    for csv_indx, (mvts, y) in enumerate(zip(data, labels)):
+        print(csv_indx)
         mvts = mvts.unsqueeze_(0)
         mvts = mvts.unsqueeze_(1)
         mvts = mvts.requires_grad_()
@@ -291,6 +302,7 @@ if __name__ == '__main__':
         # plot aia and hmi image collage
         fits_paths = []
         for subdir in os.listdir(deep_path):
+            if '.DS' in deep_path: continue
             if subdir == 'ndarrays' or subdir == '.DS_Store' or subdir == 'vids': continue
             files_in_sub = sorted(os.listdir(deep_path + subdir))
 
@@ -298,9 +310,9 @@ if __name__ == '__main__':
 
             fits_paths.append(deep_path + subdir + '/' + files_in_sub[file_loc])
 
+        
         obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_{csv_indx}_prob_{mean_probability:.2f}')
 
         # plot agrigate heatmap and data for the sample
+ 
         plot_attributions(mvts, attribution_mask, obs_date_time, max_val=max_val_t_loc, name=f'heatmap_{csv_indx}_prob_{mean_probability:.2f}')
-
-        csv_indx += 1
