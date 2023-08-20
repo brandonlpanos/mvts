@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from matplotlib.ticker import MultipleLocator
 import torch.nn.functional as F
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from datetime import datetime
 
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -125,7 +126,7 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
     ax3.set_yticks([])
     plt.tight_layout()
     if name is not None:
-        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/grad_cam/{name}.pdf', bbox_inches='tight')
+        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/neg/grad_cam/{name}.pdf', bbox_inches='tight')
     plt.show()
     plt.close(fig)
 
@@ -222,10 +223,33 @@ def plot_fits_images(fits_paths, save_name=None):
 
     plt.subplots_adjust(hspace=-0.7, wspace=0.5)  # adjust these values as needed
     if save_name is not None:
-        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/collage/{save_name}.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/neg/collage/{save_name}.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     return obs_date_time
+
+def extract_time_from_string(s):
+    if "T" in s and "Z" in s:  # Format like "2012-07-05T161201Z"
+        time_str = s.split('.')[2]
+        return datetime.strptime(time_str, '%Y-%m-%dT%H%M%SZ')
+    elif "T" in s and "_" in s:  # Format like "20120705_161245_TAI"
+        time_str = s.split('.')[2].split('_')[0] + s.split('.')[2].split('_')[1]
+        return datetime.strptime(time_str, '%Y%m%d%H%M%S')
+    else:
+        raise ValueError(f"Unrecognized datetime format in string: {s}")
+
+def find_closest_time_index(target_str, list_of_strings):
+    target_time = extract_time_from_string(target_str)
+
+    # Convert all strings in the list to datetime objects
+    times = [extract_time_from_string(s) for s in list_of_strings]
+
+    # Compute differences and get the index of the smallest difference
+    diffs = [abs(target_time - t) for t in times]
+    closest_index = np.argmin(diffs)
+    
+    return closest_index
+
 
 
 if __name__ == '__main__':
@@ -233,7 +257,7 @@ if __name__ == '__main__':
     # get index from unshuffled data loader
 
     # load csv to fits map (fix path)
-    with open('/home/panosb/sml/bpanos/mvts/csv_to_fits_map.p', 'rb') as f:
+    with open('/home/panosb/sml/bpanos/mvts/csv_to_fits_map_neg.p', 'rb') as f:
         csv_to_fits_map = pickle.load(f)
 
     # Load all data
@@ -241,7 +265,6 @@ if __name__ == '__main__':
     dataloader = DataLoader(MVTSDataset(indices, norm_type='standard'), batch_size=len(indices), shuffle=False, drop_last=False)
     data, _, labels = next(iter(dataloader))
 
-    # Calculate mean and std probability for each sample
     for csv_indx, (mvts, y) in enumerate(zip(data, labels)):
         print(csv_indx)
         mvts = mvts.unsqueeze_(0)
@@ -249,7 +272,8 @@ if __name__ == '__main__':
         mvts = mvts.requires_grad_()
         mvts = torch.nan_to_num(mvts)
 
-        # Itterate over all models from each 50 folds #? I may have to push these to the server
+        #?--------------Calculate mean and std probability for each sample and mean attribution mask------------------#
+        # Itterate over all models from each 50 folds
         probability_for_all_models = []
         attribution_masks = []
         for model_indx in range(50):
@@ -283,13 +307,15 @@ if __name__ == '__main__':
         mvts = mvts.squeeze().detach().numpy()
         attribution_masks = np.array(attribution_masks)
         attribution_mask = np.nanmean(attribution_masks, axis=0)
+        #?--------------------------------------------------------------------------------------------------------------#
+
         # Find max value in attribution mask as a mean along the features
         max_val = np.nanmax(attribution_mask, axis=1)
         max_val_t_loc = np.nanargmax(max_val)
 
         # find location to fits files #? could fix the acuracy on the time here
         noaa = csv_to_fits_map['csv_'+str(csv_indx)][0]
-        deep_path = f'/home/panosb/sml/bpanos/old/mvts/downloads_lowcad/{noaa}/'
+        deep_path = f'/home/panosb/sml/bpanos/old/mvts/downloads_lowcad_neg/{noaa}/'
         files_for_active_region = [file for file in os.listdir(deep_path)]
         max_loc = csv_to_fits_map['csv_' + str(csv_indx)][1]
 
@@ -301,15 +327,20 @@ if __name__ == '__main__':
 
         # plot aia and hmi image collage
         fits_paths = []
-        for subdir in os.listdir(deep_path):
-            if '.DS' in deep_path: continue
-            if subdir == 'ndarrays' or subdir == '.DS_Store' or subdir == 'vids': continue
+        filters = ['94', '131', '171', '193', '211', '304', '335', '1600', '1700', 'mag', 'vel']
+        for subdir in filters:
             files_in_sub = sorted(os.listdir(deep_path + subdir))
 
-            file_loc = max_val_t_loc - (40 - len(files_in_sub))
+            if subdir == '94':
+                file_loc = max_val_t_loc - (40 - len(files_in_sub))
+                target_t = files_in_sub[file_loc]
+
+
+            if subdir != '94':
+                file_loc = find_closest_time_index(target_t, files_in_sub)
+
 
             fits_paths.append(deep_path + subdir + '/' + files_in_sub[file_loc])
-
         
         obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_{csv_indx}_prob_{mean_probability:.2f}')
 
