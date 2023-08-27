@@ -48,6 +48,9 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
     - `plot_tree_maps.ipynb`: plots structure contributions in terms of TSS (relative square size)
     - `plot_grad_cam.ipynb`: plots a single example of aggregated Guided Grad-CAM over all 50 models as seen in the paper
     - `plot_feature_ranking.ipynb`: box plot for feature ranking via saliency maps as shown in the paper  
+    - `janis_downloaders/`
+      - `dat_craw.py`: downloads raw aia and hmi data based on noaar
+      - `dat_correct.py`: corrects velocity with binary maps
   - `running_metrics.py`: collects metrics from all 50 folds for each type of data augmentation and saves to a CSV file  
   - `running_classifier.py`: runs joint model on single fold
   - `running_cnn.py`: runs CNN on single fold
