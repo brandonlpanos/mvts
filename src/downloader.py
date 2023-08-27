@@ -18,6 +18,46 @@ import matplotlib.animation as manimation
 from matplotlib.ticker import MultipleLocator
 from matplotlib.animation import FuncAnimation
 
+'''
+This code can be easily placed within a four loop to extract all relevant data for a the SWAN-SF dataset
+In this case it is useful to include a function which makes sure that the flare is not too close to another flare:
+ #---------------------------------------------------------------------------------------------------------------
+
+        # function to calculate times between SWAN-data points in hrs
+        delta_t = lambda d1, d2: (abs(d1 - d2) * 12) / 60.
+
+        # get all large flare locations on SWAN-SF data grid
+        all_large_flare_locs = [ vals for _, vals in flare_loc_dic.items() ]
+        all_large_flare_locs = [item for sublist in all_large_flare_locs for item in sublist] # flatten nested list
+        for flare_cls, max_locs in flare_loc_dic.items():
+             #? Temporary try except only processing M-class flares
+            if flare_cls == 'X': continue
+            # iterate through single flare locs
+            for ii, max_loc in enumerate(max_locs):
+
+                if max_loc != 1543: continue
+
+                print('max_loc: ', max_loc)
+
+                #? Temporary try except
+                # try:
+                skip_flag = False
+                # compare distance in hrs between all other points
+                t_between_all_obs = np.array([ delta_t(max_loc, all_locs) for all_locs in all_large_flare_locs ])
+                # find where obs close together
+                within_interval = np.where(np.array(t_between_all_obs) < clean_window_thresh)[0]
+                # if close event comes before current event then skip obs
+                if len(within_interval > 1):
+                    for ob in within_interval:
+                        if all_large_flare_locs[ob] < max_loc:
+                            skip_flag = True
+                            break
+                # skip flare if there is another large flare within the threshold window "clean_window_thresh"
+                if skip_flag: continue 
+
+        #---------------------------------------------------------------------------------------------------------------
+'''
+
 
 def get_bounding_box(df_mvts: pd.DataFrame, loc: int) -> (str, int, int, int, int):
     '''

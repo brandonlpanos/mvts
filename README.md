@@ -37,6 +37,8 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
 - `src/`
   - `config.py`: high-level instructions for scripts (controls the number of epochs plus type of augmentation, base (standard, unity) and active norm)
   - `datasets.py`: script for loading data for denoising and classification tasks
+  - `downloader.py`: downloads mvts for specifies noaar and times using SWAN-SF to bootstrap AIA data
+  - `download_goes_xray.py`: downloads goes x-ray for all obs (fix paths)
   - `losses.py`: contains loss functions for denoising and classification tasks
   - `normalizations.py`: all augmentations for relaxing the structure of the input
   - `kfold/`
