@@ -12,3 +12,4 @@ throw
 hmi.sharp_cea_720s_keywords.csv
 scratch.ipynb
 scratch_downloader.ipynb
+plot_aia_hmi_collage.ipynb
