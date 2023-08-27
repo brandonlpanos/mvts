@@ -130,7 +130,7 @@ def extend(short_lightcurve, required_length):
     return extended_light_curve
 
 def truncate(short_lightcurve, required_length):
-    # If light curve slonger than suposed to be, then remove indicies from end of vector untill correct size
+    # If light curve is longer than suposed to be, then remove indicies from end of vector untill correct size
     remove_inds = np.arange(-1, -1 * required_length -1, -1)
     short_lightcurve = np.delete(short_lightcurve, remove_inds)
     return short_lightcurve
@@ -153,13 +153,8 @@ def use_bitmap(data, bitmap):
 if __name__ == '__main__':
 
     # Select the NOAA active region of interest, as well as the partition it belongs to
-    # NOAA_AR = '4920'
-    # partition = 'partition4'
-
     NOAA_AR = '3364'
     partition = 'partition3'
-
-    # 264
 
     # All SDO instruments of interest and their associated channels
     euv_data_types = {'lev1_euv_12s': ['94','131','171','193','211','304','335']}
@@ -168,7 +163,7 @@ if __name__ == '__main__':
     hmi_data_v = {'V_45s': 'vel'}
 
     # Set time to 4 hours before flare max and derive quantities
-    time_interval = 210 #! 210 original, changed for long obs     4 # (hrs)
+    time_interval = 210 # original, changed for long obs 4 # (hrs)
     n_points = time_interval * 5 # because SWAN-SF has a cadence of 12 minutes
     clean_window_thresh = 5 # define a clean window threshold (hrs)
     base_cad = 6 * 60 # in seconds (the cadance of the final mvts series, i.e., 6 minutes)
@@ -243,7 +238,7 @@ if __name__ == '__main__':
             out_dir = os.path.join(band_save_dir)
             if not os.path.exists(out_dir): os.makedirs(out_dir)
             # Construct the drms query string: either "series[timespan][wavelength]"
-            qstr = 'aia.lev1_euv_12s['+t_reform1+'/264h@6m]['+band+']{image}' #! changed from the original 4h@6m to 264h@6m
+            qstr = 'aia.lev1_euv_12s['+t_reform1+'/264h@6m]['+band+']{image}' # =changed from the original 4h@6m to 264h@6m
             # Reformulate the time argument
             t_reform2 = t_ref.replace(' ', 'T')
             # Download a seiries of images given the bounding boxes
@@ -455,8 +450,7 @@ if __name__ == '__main__':
 
     dir_velocity_fits_files = out_dir
 
-    #TODO: velocity correction
-
+    # velocity correction (ensure it works, will be only semi accurate, room for improvment)
     # Order the paths to the fits files by time
     all_bit_paths = sorted(os.listdir(dir_binary_fits_files))
     all_bit_paths = [dir_binary_fits_files + all_bit_paths[i] for i in range(len(all_bit_paths))]
@@ -478,11 +472,6 @@ if __name__ == '__main__':
     for path_to_vel in all_vel_paths:
         with fits.open(path_to_vel) as hdul:
             vel_im = hdul[1].data  # Accessing the image is in the primary HDU
-
-            # # Extract the date time from file name and reform it
-            # t_obs_vel = path_to_vel.split('/')[-1]
-            # t_obs_vel = t_obs_vel.split('.')[2] + '_' + t_obs_vel.split('.')[3]
-            # t_obs_vel = t_obs_vel[:4] + '.' + t_obs_vel[4:6] + '.' + t_obs_vel[6:8] + '_' + t_obs_vel[9:11] + ':' + t_obs_vel[11:13] + ':' + t_obs_vel[13:15] + '.' + '000_TAI'
 
             vel_header = hdul[1].header
             t_obs_vel = vel_header['T_OBS']
@@ -506,20 +495,8 @@ if __name__ == '__main__':
                 cube.append(corrected_vel_im)
                 
     cube = np.array(cube)
+    # velocity correction end
 
-    #TODO: velocity correction
-
-    # # Convert all images to numpy arrays and save
-    # files = os.listdir(band_save_dir)
-    # files.sort() # Time order fits files
-    # paths = [ band_save_dir + '/' + file for file in files if '.fits' in file ]
-    # cube = [] # Create cube of images
-    # for path in paths:
-    #     # get header infomation
-    #     hdul = fits.open(path)
-    #     image = fits.getdata(path, ext=1)
-    #     cube.append(image)
-    # cube = np.array(cube)
     ndarray_save_path = f'{save_ndarray_folder}/{band}'
     np.save(ndarray_save_path, cube) # saves array (time, x, y)
 
