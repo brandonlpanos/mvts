@@ -53,6 +53,8 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
   - `running_cnn.py`: runs CNN on single fold
   - `running_grad_cam.py`: runs guided grad-cam using a single model
   - `running_inputter.py`: runs denoising task for a single fold
+- `static/`: images
+  - `powerpoints/` power point image compilations
 
 <p align="center">
   <img width="700" src="static/grad_cam.png">
