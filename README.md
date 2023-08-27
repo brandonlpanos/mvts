@@ -55,6 +55,10 @@ Since our model is composed of a transformer, CNN hybrid, we can also use Guided
   - `running_inputter.py`: runs denoising task for a single fold
 - `static/`: images
   - `powerpoints/` power point image compilations
+- `code_overview.pdf` detailed pdf of code content
+- `csv_to_fits_map.p` python dictionary in pickled folder that links obs read in by data reader with original fits files
+- `csv_to_fits_map_neg.p/` same as above but for the negative class
+
 
 <p align="center">
   <img width="700" src="static/grad_cam.png">
