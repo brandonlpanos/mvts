@@ -11,3 +11,4 @@ kfold_results
 throw
 hmi.sharp_cea_720s_keywords.csv
 scratch.ipynb
+scratch_downloader.ipynb
