@@ -50,7 +50,7 @@ class MVTSDataset(Dataset):
             df = df.drop("target", axis=1)
             df = df.to_numpy()
             scaler = RobustScaler()
-            scaler.fit(df)
+            scaler.fit(df) 
 
             self.scaler = scaler
         self.masking_ratio = masking_ratio

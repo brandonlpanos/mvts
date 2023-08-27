@@ -126,7 +126,7 @@ def plot_attributions(mvts, attribution_mask, obs_date_time, max_val=None, name=
     ax3.set_yticks([])
     plt.tight_layout()
     if name is not None:
-        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/neg/grad_cam/{name}.pdf', bbox_inches='tight')
+        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/paper_plots/{name}.pdf', bbox_inches='tight')
     plt.show()
     plt.close(fig)
 
@@ -223,7 +223,7 @@ def plot_fits_images(fits_paths, save_name=None):
 
     plt.subplots_adjust(hspace=-0.7, wspace=0.5)  # adjust these values as needed
     if save_name is not None:
-        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/neg/collage/{save_name}.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'/home/panosb/sml/bpanos/mvts/figs/paper_plots/{save_name}.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     return obs_date_time
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     # get index from unshuffled data loader
 
     # load csv to fits map (fix path)
-    with open('/home/panosb/sml/bpanos/mvts/csv_to_fits_map_neg.p', 'rb') as f:
+    with open('/home/panosb/sml/bpanos/mvts/csv_to_fits_map.p', 'rb') as f:
         csv_to_fits_map = pickle.load(f)
 
     # Load all data
@@ -266,6 +266,7 @@ if __name__ == '__main__':
     data, _, labels = next(iter(dataloader))
 
     for csv_indx, (mvts, y) in enumerate(zip(data, labels)):
+        if csv_indx != 79: continue
         print(csv_indx)
         mvts = mvts.unsqueeze_(0)
         mvts = mvts.unsqueeze_(1)
@@ -315,7 +316,7 @@ if __name__ == '__main__':
 
         # find location to fits files #? could fix the acuracy on the time here
         noaa = csv_to_fits_map['csv_'+str(csv_indx)][0]
-        deep_path = f'/home/panosb/sml/bpanos/old/mvts/downloads_lowcad_neg/{noaa}/'
+        deep_path = f'/home/panosb/sml/bpanos/old/mvts/downloads_lowcad/{noaa}/'
         files_for_active_region = [file for file in os.listdir(deep_path)]
         max_loc = csv_to_fits_map['csv_' + str(csv_indx)][1]
 
@@ -342,8 +343,8 @@ if __name__ == '__main__':
 
             fits_paths.append(deep_path + subdir + '/' + files_in_sub[file_loc])
         
-        obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_{csv_indx}_prob_{mean_probability:.2f}')
+        obs_date_time = plot_fits_images(fits_paths, save_name=f'collage_pos_{csv_indx}_prob_{mean_probability:.2f}')
 
         # plot agrigate heatmap and data for the sample
  
-        plot_attributions(mvts, attribution_mask, obs_date_time, max_val=max_val_t_loc, name=f'heatmap_{csv_indx}_prob_{mean_probability:.2f}')
+        plot_attributions(mvts, attribution_mask, obs_date_time, max_val=max_val_t_loc, name=f'heatmap_pos_{csv_indx}_prob_{mean_probability:.2f}')
